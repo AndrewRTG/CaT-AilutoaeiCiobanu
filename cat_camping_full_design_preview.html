@@ -1,0 +1,2006 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CaT - Camping Info Web Tool</title>
+  <style>
+    :root {
+      --bg: #f4f7ee;
+      --bg-2: #e8f0dc;
+      --card: #ffffff;
+      --text: #182018;
+      --muted: #65705f;
+      --green: #2f6b3f;
+      --green-2: #174a2a;
+      --green-3: #dcebd8;
+      --orange: #d9853b;
+      --blue: #355f7a;
+      --red: #b94b4b;
+      --yellow: #f1dfb6;
+      --border: #dbe4d1;
+      --shadow: 0 20px 60px rgba(33, 55, 28, 0.12);
+      --max: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 10%, rgba(217, 133, 59, 0.20), transparent 28%),
+        radial-gradient(circle at 88% 4%, rgba(47, 107, 63, 0.18), transparent 34%),
+        linear-gradient(180deg, #fbfcf7 0%, var(--bg) 44%, #edf4e8 100%);
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .shell {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      background: rgba(245, 247, 239, 0.86);
+      border-bottom: 1px solid rgba(220, 227, 210, 0.9);
+    }
+
+    .nav {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: max-content;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--green-2), var(--green), var(--orange));
+      box-shadow: 0 12px 32px rgba(47, 107, 63, 0.28);
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .brand-text span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.74);
+      border-radius: 999px;
+    }
+
+    .nav-btn {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+      color: white;
+      background: var(--green);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      color: white;
+      background: var(--green);
+      box-shadow: 0 12px 30px rgba(47, 107, 63, 0.24);
+    }
+
+    .btn-primary:hover {
+      background: var(--green-2);
+    }
+
+    .btn-ghost {
+      color: var(--green-2);
+      background: white;
+      border: 1px solid var(--border);
+    }
+
+    .btn-soft {
+      color: var(--green-2);
+      background: var(--green-3);
+    }
+
+    .btn-danger {
+      color: white;
+      background: var(--red);
+    }
+
+    .mobile-menu {
+      display: none;
+      border: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: white;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      font-size: 22px;
+    }
+
+    .mobile-panel {
+      display: none;
+      padding: 0 0 18px;
+    }
+
+    .mobile-panel.open {
+      display: block;
+    }
+
+    .mobile-panel .nav-links {
+      display: grid;
+      border-radius: 24px;
+      gap: 8px;
+    }
+
+    .page {
+      display: none;
+      padding: 42px 0 72px;
+    }
+
+    .page.active {
+      display: block;
+      animation: fadeIn 0.24s ease both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero {
+      min-height: calc(100vh - 118px);
+      display: grid;
+      grid-template-columns: 1.04fr 0.96fr;
+      gap: 34px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--green-2);
+      background: rgba(220, 235, 216, 0.82);
+      border: 1px solid rgba(47, 107, 63, 0.16);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    h1 {
+      font-size: clamp(42px, 6vw, 76px);
+      line-height: 0.95;
+      letter-spacing: -3px;
+      margin: 18px 0;
+    }
+
+    h2 {
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1;
+      letter-spacing: -1.6px;
+      margin: 0;
+    }
+
+    h3 {
+      letter-spacing: -0.6px;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.7;
+      max-width: 660px;
+      margin: 0 0 26px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .quick-search,
+    .filters {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .quick-search {
+      grid-template-columns: 1.2fr 0.9fr 0.9fr auto;
+      max-width: 850px;
+    }
+
+    .filters {
+      grid-template-columns: 1.4fr 0.8fr 0.8fr 0.8fr auto;
+      margin-bottom: 22px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      background: #f9fbf5;
+      border: 1px solid #edf1e8;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      color: var(--text);
+      background: transparent;
+      min-height: 28px;
+    }
+
+    .visual-card {
+      position: relative;
+      min-height: 650px;
+      border-radius: 44px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      background:
+        linear-gradient(160deg, rgba(23, 74, 42, 0.2), rgba(217, 133, 59, 0.08)),
+        url('https://images.unsplash.com/photo-1504851149312-7a075b496cc7?auto=format&fit=crop&w=1200&q=80') center/cover;
+    }
+
+    .visual-card::before,
+    .visual-card::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      animation: floaty 7s ease-in-out infinite;
+    }
+
+    .visual-card::before {
+      width: 160px;
+      height: 160px;
+      top: 42px;
+      right: 46px;
+    }
+
+    .visual-card::after {
+      width: 92px;
+      height: 92px;
+      top: 238px;
+      left: 40px;
+      animation-delay: -2s;
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-16px); }
+    }
+
+    .floating-panel {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: 24px;
+      padding: 22px;
+      border-radius: 30px;
+      color: white;
+      background: rgba(20, 37, 24, 0.72);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      z-index: 1;
+    }
+
+    .floating-panel h3 {
+      margin: 0 0 10px;
+      font-size: 24px;
+    }
+
+    .floating-panel p {
+      margin: 0 0 16px;
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.55;
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .mini-stat {
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .mini-stat strong {
+      display: block;
+      font-size: 22px;
+    }
+
+    .mini-stat span {
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .section-head p {
+      max-width: 650px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin: 10px 0 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      box-shadow: 0 14px 40px rgba(33, 55, 28, 0.08);
+      overflow: hidden;
+    }
+
+    .camp-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .camp-image {
+      height: 220px;
+      position: relative;
+      background: var(--green-3);
+      overflow: hidden;
+    }
+
+    .camp-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: 0.35s ease;
+    }
+
+    .camp-card:hover .camp-image img {
+      transform: scale(1.05);
+    }
+
+    .badge-row {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      top: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .badge {
+      padding: 8px 11px;
+      border-radius: 999px;
+      color: var(--green-2);
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(10px);
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    .camp-body {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .camp-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .camp-title h3 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .rating {
+      color: #8c5b17;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .camp-body p,
+    .muted {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      color: var(--green-2);
+      background: var(--bg-2);
+      border: 1px solid #dde8d5;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .camp-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-top: 8px;
+      margin-top: auto;
+    }
+
+    .price strong {
+      font-size: 22px;
+    }
+
+    .price span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .detail-gallery {
+      display: grid;
+      grid-template-columns: 1.4fr 0.8fr;
+      grid-template-rows: 220px 220px;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .gallery-main {
+      grid-row: span 2;
+    }
+
+    .detail-gallery img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 28px;
+      box-shadow: 0 14px 34px rgba(33, 55, 28, 0.1);
+    }
+
+    .detail-card,
+    .side-card,
+    .panel {
+      padding: 24px;
+      border-radius: 32px;
+      background: white;
+      border: 1px solid var(--border);
+      box-shadow: 0 14px 40px rgba(33, 55, 28, 0.08);
+    }
+
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .feature {
+      padding: 14px;
+      border-radius: 18px;
+      background: #f7faf2;
+      border: 1px solid #edf1e8;
+      color: var(--green-2);
+      font-weight: 900;
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .date-grid,
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .form-grid .wide {
+      grid-column: span 2;
+    }
+
+    .review,
+    .message {
+      display: flex;
+      gap: 12px;
+      padding: 14px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--green-3);
+      color: var(--green-2);
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .review strong,
+    .message strong {
+      display: block;
+    }
+
+    .review p,
+    .message p {
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 5px 0 0;
+    }
+
+    .media-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .media-box {
+      min-height: 120px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      color: var(--green-2);
+      background: var(--bg-2);
+      border: 1px dashed #b9c8ad;
+      font-weight: 900;
+    }
+
+    .map-layout {
+      display: grid;
+      grid-template-columns: 0.75fr 1.25fr;
+      gap: 18px;
+    }
+
+    .map-sidebar {
+      display: grid;
+      gap: 12px;
+      height: fit-content;
+    }
+
+    .map-place {
+      display: grid;
+      grid-template-columns: 84px 1fr;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 22px;
+      background: white;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .map-place:hover,
+    .map-place.active-place {
+      border-color: var(--green);
+      transform: translateY(-1px);
+    }
+
+    .map-place img {
+      width: 84px;
+      height: 84px;
+      border-radius: 18px;
+      object-fit: cover;
+    }
+
+    .map-place h4 {
+      margin: 4px 0 6px;
+    }
+
+    .map-place p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .map-canvas {
+      position: relative;
+      min-height: 620px;
+      border-radius: 38px;
+      overflow: hidden;
+      background:
+        linear-gradient(45deg, rgba(255,255,255,0.75) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,0.75) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.75) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.75) 75%),
+        #dce8d5;
+      background-size: 42px 42px;
+      background-position: 0 0, 0 21px, 21px -21px, -21px 0;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .fake-road {
+      position: absolute;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(53, 95, 122, 0.26);
+      transform: rotate(-18deg);
+    }
+
+    .road-1 { width: 84%; left: -8%; top: 28%; }
+    .road-2 { width: 65%; right: -10%; top: 58%; transform: rotate(22deg); }
+    .road-3 { width: 52%; left: 18%; bottom: 18%; transform: rotate(5deg); }
+
+    .pin {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      border-radius: 50% 50% 50% 8px;
+      transform: rotate(-45deg);
+      display: grid;
+      place-items: center;
+      color: white;
+      background: var(--green);
+      box-shadow: 0 16px 26px rgba(23, 74, 42, 0.28);
+      border: 4px solid white;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .pin:hover,
+    .pin.selected {
+      scale: 1.12;
+    }
+
+    .pin span {
+      transform: rotate(45deg);
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .pin-one { left: 26%; top: 26%; }
+    .pin-two { left: 62%; top: 38%; background: var(--orange); }
+    .pin-three { left: 44%; top: 64%; background: var(--blue); }
+    .pin-four { left: 74%; top: 70%; }
+
+    .map-label,
+    .map-popup {
+      position: absolute;
+      padding: 18px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 14px 40px rgba(33, 55, 28, 0.08);
+    }
+
+    .map-label {
+      left: 24px;
+      top: 24px;
+      max-width: 320px;
+    }
+
+    .map-popup {
+      right: 24px;
+      bottom: 24px;
+      max-width: 300px;
+    }
+
+    .map-label strong,
+    .map-popup strong {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .map-label span,
+    .map-popup span {
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 12px;
+    }
+
+    .compare-table th {
+      text-align: left;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 0 14px;
+    }
+
+    .compare-table td {
+      padding: 18px 14px;
+      background: white;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compare-table td:first-child {
+      border-left: 1px solid var(--border);
+      border-radius: 20px 0 0 20px;
+      font-weight: 900;
+    }
+
+    .compare-table td:last-child {
+      border-right: 1px solid var(--border);
+      border-radius: 0 20px 20px 0;
+    }
+
+    .status {
+      display: inline-flex;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      background: var(--green-3);
+      color: var(--green-2);
+    }
+
+    .status.warn {
+      background: #fde7cc;
+      color: #8a4c13;
+    }
+
+    .status.danger {
+      background: #f6dada;
+      color: #8d2d2d;
+    }
+
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 18px;
+    }
+
+    .admin-menu {
+      padding: 16px;
+      border-radius: 32px;
+      background: var(--green-2);
+      color: white;
+      height: fit-content;
+      box-shadow: var(--shadow);
+    }
+
+    .admin-menu h3 {
+      margin: 6px 8px 18px;
+    }
+
+    .admin-tab {
+      width: 100%;
+      border: 0;
+      text-align: left;
+      padding: 13px 14px;
+      border-radius: 16px;
+      color: rgba(255, 255, 255, 0.78);
+      background: transparent;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .admin-tab.active,
+    .admin-tab:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .admin-content {
+      display: grid;
+      gap: 18px;
+    }
+
+    .admin-section {
+      display: none;
+      gap: 18px;
+    }
+
+    .admin-section.active {
+      display: grid;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .stat-card {
+      padding: 20px;
+      border-radius: 26px;
+      background: white;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 32px;
+      margin-top: 8px;
+      letter-spacing: -1px;
+    }
+
+    .chart-wrap {
+      min-height: 280px;
+      display: grid;
+      place-items: center;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 640px;
+    }
+
+    .admin-table th,
+    .admin-table td {
+      text-align: left;
+      padding: 14px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .admin-table th {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .auth-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .auth-card {
+      padding: 28px;
+      border-radius: 32px;
+      background: white;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .oauth-options {
+      display: grid;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .oauth-btn {
+      min-height: 54px;
+      justify-content: flex-start;
+      background: #f8fbf4;
+      color: var(--green-2);
+      border: 1px solid var(--border);
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 200;
+      max-width: 380px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      color: white;
+      background: var(--green-2);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .footer {
+      padding: 34px 0;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .footer-grid {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    @media (max-width: 1100px) {
+      .nav > .nav-links,
+      .actions {
+        display: none;
+      }
+
+      .mobile-menu {
+        display: block;
+      }
+
+      .hero,
+      .detail-layout,
+      .map-layout,
+      .admin-layout,
+      .auth-box {
+        grid-template-columns: 1fr;
+      }
+
+      .visual-card {
+        min-height: 520px;
+      }
+
+      .quick-search,
+      .filters {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .quick-search .btn,
+      .filters .btn {
+        grid-column: span 2;
+      }
+
+      .grid-3,
+      .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        width: min(100% - 20px, var(--max));
+      }
+
+      .page {
+        padding-top: 28px;
+      }
+
+      .nav {
+        height: 68px;
+      }
+
+      .brand-text span {
+        display: none;
+      }
+
+      h1 {
+        letter-spacing: -2px;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .quick-search,
+      .filters,
+      .grid-3,
+      .grid-2,
+      .detail-gallery,
+      .feature-list,
+      .date-grid,
+      .form-grid,
+      .stat-grid,
+      .media-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-search .btn,
+      .filters .btn,
+      .form-grid .wide {
+        grid-column: auto;
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      .detail-gallery {
+        grid-template-rows: auto;
+      }
+
+      .detail-gallery img {
+        min-height: 220px;
+      }
+
+      .gallery-main {
+        grid-row: auto;
+      }
+
+      .visual-card {
+        min-height: 460px;
+        border-radius: 30px;
+      }
+
+      .mini-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .compare-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .map-canvas {
+        min-height: 520px;
+      }
+
+      .map-label {
+        left: 12px;
+        top: 12px;
+        right: 12px;
+      }
+
+      .map-popup {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+      }
+
+      .footer-grid {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <nav class="nav">
+        <a href="#home" class="brand" data-route="home">
+          <div class="brand-mark">CaT</div>
+          <div class="brand-text">
+            <strong>Camping Info</strong>
+            <span>Rezervari, harta, recenzii</span>
+          </div>
+        </a>
+
+        <div class="nav-links">
+          <button class="nav-btn active" type="button" data-route="home">Acasa</button>
+          <button class="nav-btn" type="button" data-route="campings">Campinguri</button>
+          <button class="nav-btn" type="button" data-route="details">Pagina camping</button>
+          <button class="nav-btn" type="button" data-route="map">Harta</button>
+          <button class="nav-btn" type="button" data-route="compare">Compara</button>
+          <button class="nav-btn" type="button" data-route="community">Comunitate</button>
+          <button class="nav-btn" type="button" data-route="admin">Admin</button>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-ghost" type="button" data-route="auth">OAuth Login</button>
+          <button class="btn btn-primary" type="button" data-route="campings">Rezerva</button>
+        </div>
+
+        <button class="mobile-menu" id="mobileMenu" type="button">☰</button>
+      </nav>
+
+      <div class="mobile-panel" id="mobilePanel">
+        <div class="nav-links">
+          <button class="nav-btn active" type="button" data-route="home">Acasa</button>
+          <button class="nav-btn" type="button" data-route="campings">Campinguri</button>
+          <button class="nav-btn" type="button" data-route="details">Pagina camping</button>
+          <button class="nav-btn" type="button" data-route="map">Harta</button>
+          <button class="nav-btn" type="button" data-route="compare">Compara</button>
+          <button class="nav-btn" type="button" data-route="community">Comunitate</button>
+          <button class="nav-btn" type="button" data-route="admin">Admin</button>
+          <button class="nav-btn" type="button" data-route="auth">OAuth Login</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page active" id="home">
+      <div class="shell hero">
+        <div>
+          <span class="eyebrow">Platforma modulara pentru campinguri</span>
+          <h1>Gaseste, compara si rezerva locuri de camping.</h1>
+          <p class="lead">CaT centralizeaza campinguri, disponibilitate, recenzii, continut multimedia si harta interactiva intr-o interfata simpla pentru utilizatori si administratori.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" type="button" data-route="campings">Exploreaza campinguri</button>
+            <button class="btn btn-ghost" type="button" data-route="map">Vezi harta</button>
+          </div>
+          <div class="quick-search">
+            <div class="field">
+              <label>Zona</label>
+              <input type="text" placeholder="Ex: Apuseni, Bucovina, Delta">
+            </div>
+            <div class="field">
+              <label>Check-in</label>
+              <input type="date">
+            </div>
+            <div class="field">
+              <label>Persoane</label>
+              <select>
+                <option>2 persoane</option>
+                <option>4 persoane</option>
+                <option>6+ persoane</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" type="button" data-route="campings">Cauta</button>
+          </div>
+        </div>
+
+        <div class="visual-card">
+          <div class="floating-panel">
+            <h3>Campinguri verificate si pagini generate automat</h3>
+            <p>Fiecare locatie are galerie, recenzii, comentarii, facilitati, coordonate si posibilitatea de rezervare.</p>
+            <div class="mini-stats">
+              <div class="mini-stat">
+                <strong>128</strong>
+                <span>locuri listate</span>
+              </div>
+              <div class="mini-stat">
+                <strong>4.8</strong>
+                <span>rating mediu</span>
+              </div>
+              <div class="mini-stat">
+                <strong>32k</strong>
+                <span>vizualizari harta</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="campings">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Catalog campinguri</span>
+            <h2>Locatii recomandate</h2>
+            <p>Cauta dupa zona, pret, rating si facilitati. Cardurile duc rapid spre pagina proprie a fiecarui camping.</p>
+          </div>
+          <button class="btn btn-soft" type="button" data-route="compare">Compara selectiile</button>
+        </div>
+
+        <div class="filters">
+          <div class="field">
+            <label>Cautare</label>
+            <input id="searchInput" type="text" placeholder="Nume camping sau zona">
+          </div>
+          <div class="field">
+            <label>Zona</label>
+            <select id="zoneFilter">
+              <option value="all">Toate zonele</option>
+              <option value="munte">Munte</option>
+              <option value="lac">Lac</option>
+              <option value="padure">Padure</option>
+              <option value="delta">Delta</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Pret</label>
+            <select>
+              <option>Orice pret</option>
+              <option>Sub 100 RON</option>
+              <option>100-200 RON</option>
+              <option>200+ RON</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Facilitati</label>
+            <select>
+              <option>Orice</option>
+              <option>Dusuri</option>
+              <option>Wi-Fi</option>
+              <option>Pet friendly</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" type="button" id="filterBtn">Filtreaza</button>
+        </div>
+
+        <div class="grid-3" id="campingGrid">
+          <article class="card camp-card" data-zone="munte padure" data-name="green valley camp">
+            <div class="camp-image">
+              <img src="https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=900&q=80" alt="Camping langa padure">
+              <div class="badge-row">
+                <span class="badge">Munte</span>
+                <span class="badge">Disponibil</span>
+              </div>
+            </div>
+            <div class="camp-body">
+              <div class="camp-title">
+                <h3>Green Valley Camp</h3>
+                <span class="rating">★ 4.9</span>
+              </div>
+              <p>Camping linistit langa padure, potrivit pentru corturi, rulote si familii.</p>
+              <div class="tags">
+                <span class="tag">Wi-Fi</span>
+                <span class="tag">Dusuri</span>
+                <span class="tag">Pet friendly</span>
+              </div>
+              <div class="camp-footer">
+                <div class="price"><strong>120 RON</strong><br><span>pe noapte</span></div>
+                <button class="btn btn-primary" type="button" data-route="details">Detalii</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="card camp-card" data-zone="lac" data-name="lake horizon">
+            <div class="camp-image">
+              <img src="https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=900&q=80" alt="Camping langa lac">
+              <div class="badge-row">
+                <span class="badge">Lac</span>
+                <span class="badge">Top</span>
+              </div>
+            </div>
+            <div class="camp-body">
+              <div class="camp-title">
+                <h3>Lake Horizon</h3>
+                <span class="rating">★ 4.7</span>
+              </div>
+              <p>Locatie cu ponton, activitati pe apa si zone dedicate pentru rulote.</p>
+              <div class="tags">
+                <span class="tag">Caiac</span>
+                <span class="tag">Parcare</span>
+                <span class="tag">Video tours</span>
+              </div>
+              <div class="camp-footer">
+                <div class="price"><strong>180 RON</strong><br><span>pe noapte</span></div>
+                <button class="btn btn-primary" type="button" data-route="details">Detalii</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="card camp-card" data-zone="padure" data-name="forest nest">
+            <div class="camp-image">
+              <img src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=900&q=80" alt="Camping cu corturi">
+              <div class="badge-row">
+                <span class="badge">Padure</span>
+                <span class="badge">Nou</span>
+              </div>
+            </div>
+            <div class="camp-body">
+              <div class="camp-title">
+                <h3>Forest Nest</h3>
+                <span class="rating">★ 4.6</span>
+              </div>
+              <p>Spatiu retras cu trasee, foc de tabara si zone separate pentru grupuri.</p>
+              <div class="tags">
+                <span class="tag">Trasee</span>
+                <span class="tag">Foc de tabara</span>
+                <span class="tag">Audio reviews</span>
+              </div>
+              <div class="camp-footer">
+                <div class="price"><strong>95 RON</strong><br><span>pe noapte</span></div>
+                <button class="btn btn-primary" type="button" data-route="details">Detalii</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="card camp-card" data-zone="delta" data-name="delta wild camp">
+            <div class="camp-image">
+              <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80" alt="Camping in natura">
+              <div class="badge-row">
+                <span class="badge">Delta</span>
+                <span class="badge">Eco</span>
+              </div>
+            </div>
+            <div class="camp-body">
+              <div class="camp-title">
+                <h3>Delta Wild Camp</h3>
+                <span class="rating">★ 4.5</span>
+              </div>
+              <p>Experienta eco langa apa, cu zone de observare si ghizi locali.</p>
+              <div class="tags">
+                <span class="tag">Eco</span>
+                <span class="tag">Ghizi</span>
+                <span class="tag">Foto spots</span>
+              </div>
+              <div class="camp-footer">
+                <div class="price"><strong>150 RON</strong><br><span>pe noapte</span></div>
+                <button class="btn btn-primary" type="button" data-route="details">Detalii</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="details">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Pagina proprie camping</span>
+            <h2>Green Valley Camp</h2>
+            <p>Exemplu de pagina generata pentru un camping: galerie multimedia, descriere, recenzii, comentarii si modul de rezervare.</p>
+          </div>
+          <button class="btn btn-ghost" type="button" data-route="map">Vezi pe harta</button>
+        </div>
+
+        <div class="detail-gallery">
+          <img class="gallery-main" src="https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=1100&q=80" alt="Camping principal">
+          <img src="https://images.unsplash.com/photo-1504851149312-7a075b496cc7?auto=format&fit=crop&w=800&q=80" alt="Corturi">
+          <img src="https://images.unsplash.com/photo-1496545672447-f699b503d270?auto=format&fit=crop&w=800&q=80" alt="Foc de tabara">
+        </div>
+
+        <div class="detail-layout">
+          <div class="detail-card">
+            <h2>Camping pentru familii, rulote si iubitori de natura</h2>
+            <p class="lead">Green Valley Camp ofera locuri pentru corturi, zone de rulote, dusuri moderne, zona de gatit, Wi-Fi si trasee marcate. Utilizatorii pot adauga poze, audio, video si impresii direct in pagina campingului.</p>
+            <div class="feature-list">
+              <div class="feature">Coordonate OSM</div>
+              <div class="feature">Rezervari online</div>
+              <div class="feature">Recenzii si rating</div>
+              <div class="feature">Foto, audio, video</div>
+            </div>
+            <h3>Galerie multimedia</h3>
+            <div class="media-strip">
+              <div class="media-box">Foto</div>
+              <div class="media-box">Audio review</div>
+              <div class="media-box">Video tour</div>
+            </div>
+            <h3>Comentarii recente</h3>
+            <div class="review">
+              <div class="avatar">A</div>
+              <div>
+                <strong>Andrei · ★ 5.0</strong>
+                <p>Locatia este foarte curata, iar zona de foc de tabara a fost perfecta pentru grupul nostru.</p>
+              </div>
+            </div>
+            <div class="review">
+              <div class="avatar">M</div>
+              <div>
+                <strong>Maria · ★ 4.8</strong>
+                <p>Mi-a placut ca am putut vedea poze reale incarcate de alti utilizatori inainte de rezervare.</p>
+              </div>
+            </div>
+          </div>
+
+          <aside class="side-stack">
+            <div class="side-card">
+              <h3>Rezerva locul</h3>
+              <div class="date-grid">
+                <div class="field">
+                  <label>Check-in</label>
+                  <input type="date">
+                </div>
+                <div class="field">
+                  <label>Check-out</label>
+                  <input type="date">
+                </div>
+              </div>
+              <div class="field" style="margin-top: 10px;">
+                <label>Numar persoane</label>
+                <select>
+                  <option>2 persoane</option>
+                  <option>4 persoane</option>
+                  <option>6+ persoane</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" type="button" style="width: 100%; margin-top: 14px;" data-toast="Rezervarea a fost simulata in preview.">Trimite rezervare</button>
+            </div>
+
+            <div class="side-card">
+              <h3>Adauga impresie</h3>
+              <div class="field">
+                <label>Mesaj</label>
+                <textarea rows="4" placeholder="Scrie o impresie..."></textarea>
+              </div>
+              <div class="field" style="margin-top: 10px;">
+                <label>Multimedia</label>
+                <input type="file" multiple>
+              </div>
+              <button class="btn btn-soft" type="button" style="width: 100%; margin-top: 14px;" data-toast="Comentariul a fost simulat in preview.">Publica</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="map">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">OpenStreetMap API</span>
+            <h2>Harta interactiva</h2>
+            <p>Zona de harta este gandita pentru markere, cautare spatiala si comparare rapida intre campinguri. In implementarea finala aici se conecteaza API-ul OpenStreetMap.</p>
+          </div>
+        </div>
+
+        <div class="map-layout">
+          <div class="map-sidebar">
+            <div class="field">
+              <label>Cauta pe harta</label>
+              <input type="text" placeholder="Ex: camping langa lac">
+            </div>
+            <div class="map-place active-place" data-place="Green Valley · 4.9 rating · 120 RON/noapte">
+              <img src="https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=300&q=80" alt="Green Valley">
+              <div>
+                <h4>Green Valley</h4>
+                <p>4.9 rating · 120 RON · Padure</p>
+              </div>
+            </div>
+            <div class="map-place" data-place="Lake Horizon · 4.7 rating · 180 RON/noapte">
+              <img src="https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=300&q=80" alt="Lake Horizon">
+              <div>
+                <h4>Lake Horizon</h4>
+                <p>4.7 rating · 180 RON · Lac</p>
+              </div>
+            </div>
+            <div class="map-place" data-place="Forest Nest · 4.6 rating · 95 RON/noapte">
+              <img src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=300&q=80" alt="Forest Nest">
+              <div>
+                <h4>Forest Nest</h4>
+                <p>4.6 rating · 95 RON · Trasee</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="map-canvas">
+            <div class="fake-road road-1"></div>
+            <div class="fake-road road-2"></div>
+            <div class="fake-road road-3"></div>
+            <div class="map-label">
+              <strong>Preview harta</strong>
+              <span>In proiectul final, acest container devine harta OSM cu markere, popup-uri si filtre asincrone.</span>
+            </div>
+            <div class="pin pin-one selected" data-place="Green Valley · 4.9 rating · 120 RON/noapte"><span>1</span></div>
+            <div class="pin pin-two" data-place="Lake Horizon · 4.7 rating · 180 RON/noapte"><span>2</span></div>
+            <div class="pin pin-three" data-place="Forest Nest · 4.6 rating · 95 RON/noapte"><span>3</span></div>
+            <div class="pin pin-four" data-place="Delta Wild Camp · 4.5 rating · 150 RON/noapte"><span>4</span></div>
+            <div class="map-popup" id="mapPopup">
+              <strong>Green Valley</strong>
+              <span>4.9 rating · 120 RON/noapte</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="compare">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Comparare locatii</span>
+            <h2>Alege campingul potrivit</h2>
+            <p>Compararea ajuta utilizatorul sa decida rapid intre locatii in functie de pret, rating, facilitati, disponibilitate si zona.</p>
+          </div>
+        </div>
+
+        <div class="card" style="padding: 18px;">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Criteriu</th>
+                <th>Green Valley</th>
+                <th>Lake Horizon</th>
+                <th>Forest Nest</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Zona</td>
+                <td>Padure / Munte</td>
+                <td>Lac</td>
+                <td>Padure</td>
+              </tr>
+              <tr>
+                <td>Pret/noapte</td>
+                <td>120 RON</td>
+                <td>180 RON</td>
+                <td>95 RON</td>
+              </tr>
+              <tr>
+                <td>Rating</td>
+                <td>★ 4.9</td>
+                <td>★ 4.7</td>
+                <td>★ 4.6</td>
+              </tr>
+              <tr>
+                <td>Facilitati</td>
+                <td>Wi-Fi, dusuri, pet friendly</td>
+                <td>Ponton, caiac, parcare</td>
+                <td>Trasee, foc de tabara</td>
+              </tr>
+              <tr>
+                <td>Disponibilitate</td>
+                <td><span class="status">Disponibil</span></td>
+                <td><span class="status warn">Limitat</span></td>
+                <td><span class="status">Disponibil</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="community">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Mesaje si impresii</span>
+            <h2>Comunitatea CaT</h2>
+            <p>Utilizatorii pot schimba impresii, pot posta fotografii, audio reviews si video-uri scurte despre locurile vizitate.</p>
+          </div>
+          <button class="btn btn-primary" type="button" data-toast="Mesaj nou simulat in preview.">Adauga mesaj</button>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <h3>Feed recent</h3>
+            <div class="message">
+              <div class="avatar">D</div>
+              <div>
+                <strong>Dan · Green Valley</strong>
+                <p>Am incarcat 6 poze noi cu zona de corturi si spatiile comune.</p>
+              </div>
+            </div>
+            <div class="message">
+              <div class="avatar">I</div>
+              <div>
+                <strong>Ioana · Lake Horizon</strong>
+                <p>Review audio: pontonul este superb dimineata, dar se aglomereaza dupa pranz.</p>
+              </div>
+            </div>
+            <div class="message">
+              <div class="avatar">R</div>
+              <div>
+                <strong>Radu · Forest Nest</strong>
+                <p>Video tour incarcat pentru traseul scurt din spatele campingului.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Publica impresie</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label>Camping</label>
+                <select>
+                  <option>Green Valley</option>
+                  <option>Lake Horizon</option>
+                  <option>Forest Nest</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Tip continut</label>
+                <select>
+                  <option>Text</option>
+                  <option>Foto</option>
+                  <option>Audio</option>
+                  <option>Video</option>
+                </select>
+              </div>
+              <div class="field wide">
+                <label>Mesaj</label>
+                <textarea rows="5" placeholder="Scrie experienta ta..."></textarea>
+              </div>
+              <div class="field wide">
+                <label>Fisier multimedia</label>
+                <input type="file">
+              </div>
+            </div>
+            <button class="btn btn-primary" type="button" style="margin-top: 14px;" data-toast="Publicarea a fost simulata in preview.">Publica</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="admin">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Modul administrare</span>
+            <h2>Dashboard pentru administratori</h2>
+            <p>Adminul poate gestiona oferte, utilizatori, rezervari si poate genera statistici textuale, SVG si PDF.</p>
+          </div>
+        </div>
+
+        <div class="admin-layout">
+          <aside class="admin-menu">
+            <h3>Admin</h3>
+            <button class="admin-tab active" type="button" data-admin="dashboard">Dashboard</button>
+            <button class="admin-tab" type="button" data-admin="offers">Campinguri</button>
+            <button class="admin-tab" type="button" data-admin="reservations">Rezervari</button>
+            <button class="admin-tab" type="button" data-admin="users">Utilizatori</button>
+            <button class="admin-tab" type="button" data-admin="exports">Import / Export</button>
+          </aside>
+
+          <div class="admin-content">
+            <div class="admin-section active" id="admin-dashboard">
+              <div class="stat-grid">
+                <div class="stat-card"><span>Rezervari luna</span><strong>412</strong></div>
+                <div class="stat-card"><span>Venit estimat</span><strong>58k</strong></div>
+                <div class="stat-card"><span>Utilizatori activi</span><strong>1.8k</strong></div>
+                <div class="stat-card"><span>Media rating</span><strong>4.8</strong></div>
+              </div>
+
+              <div class="grid-2">
+                <div class="panel">
+                  <h3>Perioade populare</h3>
+                  <div class="chart-wrap">
+                    <svg width="100%" height="240" viewBox="0 0 520 240" role="img" aria-label="Grafic SVG perioade populare">
+                      <rect x="0" y="0" width="520" height="240" rx="24" fill="#f7faf2"></rect>
+                      <line x1="58" y1="190" x2="480" y2="190" stroke="#dce3d2" stroke-width="2"></line>
+                      <line x1="58" y1="40" x2="58" y2="190" stroke="#dce3d2" stroke-width="2"></line>
+                      <rect x="90" y="120" width="46" height="70" rx="10" fill="#2f6b3f"></rect>
+                      <rect x="170" y="88" width="46" height="102" rx="10" fill="#d9853b"></rect>
+                      <rect x="250" y="54" width="46" height="136" rx="10" fill="#355f7a"></rect>
+                      <rect x="330" y="72" width="46" height="118" rx="10" fill="#2f6b3f"></rect>
+                      <rect x="410" y="112" width="46" height="78" rx="10" fill="#d9853b"></rect>
+                      <text x="92" y="218" font-size="13" fill="#66705f">Mai</text>
+                      <text x="172" y="218" font-size="13" fill="#66705f">Iun</text>
+                      <text x="252" y="218" font-size="13" fill="#66705f">Iul</text>
+                      <text x="332" y="218" font-size="13" fill="#66705f">Aug</text>
+                      <text x="412" y="218" font-size="13" fill="#66705f">Sep</text>
+                    </svg>
+                  </div>
+                  <button class="btn btn-soft" type="button" data-toast="Export SVG simulat.">Export SVG</button>
+                  <button class="btn btn-primary" type="button" data-toast="Export PDF simulat.">Export PDF</button>
+                </div>
+
+                <div class="panel">
+                  <h3>Zone populare</h3>
+                  <p class="muted">1. Apuseni · 34% din rezervari</p>
+                  <p class="muted">2. Bucovina · 21% din rezervari</p>
+                  <p class="muted">3. Delta Dunarii · 18% din rezervari</p>
+                  <p class="muted">4. Brasov · 15% din rezervari</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-section" id="admin-offers">
+              <div class="panel">
+                <h3>Adauga camping</h3>
+                <div class="form-grid">
+                  <div class="field"><label>Nume</label><input type="text" placeholder="Nume locatie"></div>
+                  <div class="field"><label>Pret/noapte</label><input type="number" placeholder="120"></div>
+                  <div class="field"><label>Latitudine</label><input type="text" placeholder="47.1585"></div>
+                  <div class="field"><label>Longitudine</label><input type="text" placeholder="27.6014"></div>
+                  <div class="field wide"><label>Descriere</label><textarea rows="4" placeholder="Descriere camping"></textarea></div>
+                </div>
+                <button class="btn btn-primary" type="button" style="margin-top: 14px;" data-toast="Camping adaugat in preview.">Salveaza oferta</button>
+              </div>
+            </div>
+
+            <div class="admin-section" id="admin-reservations">
+              <div class="panel table-wrap">
+                <h3>Rezervari recente</h3>
+                <table class="admin-table">
+                  <thead><tr><th>Utilizator</th><th>Camping</th><th>Perioada</th><th>Status</th><th>Actiuni</th></tr></thead>
+                  <tbody>
+                    <tr><td>Andrei C.</td><td>Green Valley</td><td>12-15 Iul</td><td><span class="status">Confirmata</span></td><td><button class="btn btn-soft" type="button" data-toast="Rezervare vazuta.">Vezi</button></td></tr>
+                    <tr><td>Maria P.</td><td>Lake Horizon</td><td>22-24 Iul</td><td><span class="status warn">In asteptare</span></td><td><button class="btn btn-primary" type="button" data-toast="Rezervare confirmata.">Confirma</button></td></tr>
+                    <tr><td>Radu I.</td><td>Forest Nest</td><td>02-05 Aug</td><td><span class="status">Confirmata</span></td><td><button class="btn btn-danger" type="button" data-toast="Rezervare anulata in preview.">Anuleaza</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="admin-section" id="admin-users">
+              <div class="panel table-wrap">
+                <h3>Utilizatori</h3>
+                <table class="admin-table">
+                  <thead><tr><th>Nume</th><th>Email</th><th>Rol</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td>Admin CaT</td><td>admin@cat.local</td><td>admin</td><td><span class="status">Activ</span></td></tr>
+                    <tr><td>Maria Pop</td><td>maria@example.com</td><td>user</td><td><span class="status">Activ</span></td></tr>
+                    <tr><td>Radu Ion</td><td>radu@example.com</td><td>user</td><td><span class="status warn">Nou</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="admin-section" id="admin-exports">
+              <div class="grid-2">
+                <div class="panel">
+                  <h3>Import date</h3>
+                  <p class="muted">Incarcare CSV sau JSON pentru campinguri, facilitati si disponibilitate.</p>
+                  <div class="field" style="margin-top: 14px;"><label>Fisier</label><input type="file"></div>
+                  <button class="btn btn-primary" type="button" style="margin-top: 14px;" data-toast="Import simulat.">Importa</button>
+                </div>
+                <div class="panel">
+                  <h3>Export date</h3>
+                  <p class="muted">Export pentru campinguri, rezervari, utilizatori si statistici.</p>
+                  <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;">
+                    <button class="btn btn-soft" type="button" data-toast="Export CSV simulat.">CSV</button>
+                    <button class="btn btn-soft" type="button" data-toast="Export JSON simulat.">JSON</button>
+                    <button class="btn btn-primary" type="button" data-toast="Raport PDF simulat.">PDF</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="auth">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Autentificare OAuth</span>
+            <h2>Login sigur pentru utilizatori si administratori</h2>
+            <p>In implementarea finala, butoanele vor porni fluxul OAuth. In preview sunt doar pentru design.</p>
+          </div>
+        </div>
+
+        <div class="auth-box">
+          <div class="auth-card">
+            <h3>Continua cu un provider</h3>
+            <p class="muted">Utilizatorul intra rapid in cont si poate face rezervari, recenzii si upload multimedia.</p>
+            <div class="oauth-options">
+              <button class="btn oauth-btn" type="button" data-toast="OAuth Google simulat.">Google OAuth</button>
+              <button class="btn oauth-btn" type="button" data-toast="OAuth GitHub simulat.">GitHub OAuth</button>
+              <button class="btn oauth-btn" type="button" data-toast="OAuth OpenStreetMap simulat.">OpenStreetMap OAuth</button>
+            </div>
+          </div>
+          <div class="auth-card">
+            <h3>Roluri dupa autentificare</h3>
+            <p class="muted">User obisnuit: rezervari, comentarii, recenzii, multimedia.</p>
+            <p class="muted">Admin: management campinguri, utilizatori, statistici, import/export.</p>
+            <button class="btn btn-primary" type="button" style="margin-top: 18px;" data-route="admin">Vezi admin demo</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="shell footer-grid">
+      <div class="brand">
+        <div class="brand-mark">CaT</div>
+        <div class="brand-text">
+          <strong>Camping Info</strong>
+          <span>Web tool modular pentru campinguri</span>
+        </div>
+      </div>
+      <p>HTML + CSS + JavaScript vanilla · responsive · pregatit pentru API-uri AJAX</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast">Actiune simulata in preview.</div>
+
+  <script>
+    const pages = document.querySelectorAll('.page');
+    const routeButtons = document.querySelectorAll('[data-route]');
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobilePanel = document.getElementById('mobilePanel');
+    const toast = document.getElementById('toast');
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function routeTo(id) {
+      pages.forEach(page => page.classList.toggle('active', page.id === id));
+      navButtons.forEach(button => button.classList.toggle('active', button.dataset.route === id));
+      mobilePanel.classList.remove('open');
+      history.replaceState(null, '', '#' + id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    routeButtons.forEach(button => {
+      button.addEventListener('click', event => {
+        event.preventDefault();
+        const id = button.dataset.route;
+        if (id) routeTo(id);
+      });
+    });
+
+    mobileMenu.addEventListener('click', () => {
+      mobilePanel.classList.toggle('open');
+    });
+
+    document.querySelectorAll('[data-toast]').forEach(button => {
+      button.addEventListener('click', () => showToast(button.dataset.toast));
+    });
+
+    const filterBtn = document.getElementById('filterBtn');
+    const searchInput = document.getElementById('searchInput');
+    const zoneFilter = document.getElementById('zoneFilter');
+    const campingCards = document.querySelectorAll('.camp-card');
+
+    function filterCampings() {
+      const text = searchInput.value.trim().toLowerCase();
+      const zone = zoneFilter.value;
+      let visible = 0;
+
+      campingCards.forEach(card => {
+        const name = card.dataset.name;
+        const zones = card.dataset.zone;
+        const matchesText = !text || name.includes(text);
+        const matchesZone = zone === 'all' || zones.includes(zone);
+        const show = matchesText && matchesZone;
+        card.style.display = show ? 'flex' : 'none';
+        if (show) visible += 1;
+      });
+
+      showToast(visible + ' campinguri gasite in preview.');
+    }
+
+    filterBtn.addEventListener('click', filterCampings);
+    searchInput.addEventListener('input', filterCampings);
+    zoneFilter.addEventListener('change', filterCampings);
+
+    const pins = document.querySelectorAll('.pin');
+    const places = document.querySelectorAll('.map-place');
+    const mapPopup = document.getElementById('mapPopup');
+
+    function selectMapItem(label) {
+      const parts = label.split(' · ');
+      mapPopup.innerHTML = '<strong>' + parts[0] + '</strong><span>' + parts.slice(1).join(' · ') + '</span>';
+      showToast('Selectat pe harta: ' + parts[0]);
+    }
+
+    pins.forEach(pin => {
+      pin.addEventListener('click', () => {
+        pins.forEach(item => item.classList.remove('selected'));
+        pin.classList.add('selected');
+        selectMapItem(pin.dataset.place);
+      });
+    });
+
+    places.forEach(place => {
+      place.addEventListener('click', () => {
+        places.forEach(item => item.classList.remove('active-place'));
+        place.classList.add('active-place');
+        selectMapItem(place.dataset.place);
+      });
+    });
+
+    const adminTabs = document.querySelectorAll('.admin-tab');
+    const adminSections = document.querySelectorAll('.admin-section');
+
+    adminTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const key = tab.dataset.admin;
+        adminTabs.forEach(item => item.classList.remove('active'));
+        tab.classList.add('active');
+        adminSections.forEach(section => section.classList.toggle('active', section.id === 'admin-' + key));
+      });
+    });
+
+    const initial = window.location.hash.replace('#', '');
+    if (initial && document.getElementById(initial)) {
+      routeTo(initial);
+    }
+  </script>
+</body>
+</html>
