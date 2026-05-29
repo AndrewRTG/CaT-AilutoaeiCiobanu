@@ -12,7 +12,7 @@
       <div class="auth-card">
         <h3>Alege o metoda de autentificare</h3>
         <div class="oauth-options">
-          <a class="btn oauth-btn" href="auth/login.php?provider=github">Continua cu GitHub</a>
+         <a class="btn oauth-btn" href="auth/github.php">Continua cu GitHub</a>
           <a class="btn oauth-btn" href="auth/login.php?provider=google">Continua cu Google</a>
           <a class="btn oauth-btn" href="auth/login.php?provider=osm">Continua cu contul hartii</a>
         </div>

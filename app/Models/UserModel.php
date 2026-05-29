@@ -23,6 +23,28 @@ class UserModel
 
         return (int) $stmt->fetchColumn();
     }
+    
+    public static function findOrCreateOAuthUser(string $provider, string $providerId, string $name, ?string $email): int
+{
+    $stmt = db()->prepare('SELECT id FROM users WHERE provider = ? AND provider_id = ?');
+    $stmt->execute([$provider, $providerId]);
+    $existingId = $stmt->fetchColumn();
+
+    if ($existingId) {
+        db()->prepare('UPDATE users SET name = ?, email = ? WHERE id = ?')
+            ->execute([$name, $email, $existingId]);
+
+        return (int) $existingId;
+    }
+
+    $stmt = db()->prepare(
+        'INSERT INTO users (provider, provider_id, name, email, role, status)
+         VALUES (?, ?, ?, ?, ?, ?)'
+    );
+    $stmt->execute([$provider, $providerId, $name, $email, 'member', 'active']);
+
+    return (int) db()->lastInsertId();
+}
 
     public static function all(): array
     {
@@ -41,4 +63,6 @@ class UserModel
     {
         return db()->query('SELECT id, name, email, role, status FROM users')->fetchAll();
     }
+
+    
 }

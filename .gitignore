@@ -2,3 +2,4 @@
 /storage/*.log
 /storage/uploads/*
 !/storage/uploads/.gitkeep
+config/oauth.php
