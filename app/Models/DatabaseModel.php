@@ -47,12 +47,7 @@ class DatabaseModel
         UNIQUE(provider, provider_id)
     )");
 
-        $db->exec("CREATE TABLE IF NOT EXISTS sessions (
-            id TEXT PRIMARY KEY,
-            data TEXT NOT NULL,
-            expires_at INTEGER NOT NULL,
-            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )");
+
 
         $db->exec("CREATE TABLE IF NOT EXISTS auth_tokens (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

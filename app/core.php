@@ -4,6 +4,15 @@ declare(strict_types=1);
 const DB_FILE = __DIR__ . '/../storage/cat.sqlite';
 const UPLOAD_DIR = __DIR__ . '/../storage/uploads';
 const UPLOAD_URL = 'storage/uploads';
+$configFile = __DIR__ . '/../config/oauth.php';
+
+if (is_file($configFile)) {
+    require_once $configFile;
+}
+
+if (!defined('ADMIN_EMAILS')) {
+    define('ADMIN_EMAILS', []);
+}
 
 
 

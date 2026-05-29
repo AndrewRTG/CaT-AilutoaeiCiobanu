@@ -7,6 +7,18 @@ class UserModel
     {
     return AuthTokenModel::userFromToken(bearer_token());
     }
+        private static function roleForEmail(?string $email): string
+    {
+        $normalizedEmail = strtolower(trim((string) $email));
+
+        foreach (ADMIN_EMAILS as $adminEmail) {
+            if ($normalizedEmail === strtolower(trim((string) $adminEmail))) {
+                return 'admin';
+            }
+        }
+
+        return 'member';
+    }
 
     public static function demoUserId(string $role): int
     {
@@ -36,12 +48,14 @@ class UserModel
         }
 
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+         $role = self::roleForEmail($email);
 
         $stmt = db()->prepare(
             'INSERT INTO users (provider, provider_id, name, email, password_hash, role, status)
             VALUES (?, ?, ?, ?, ?, ?, ?)'
         );
-        $stmt->execute(['local', $email, $name, $email, $passwordHash, 'member', 'active']);
+        
+        $stmt->execute(['local', $email, $name, $email, $passwordHash, $role, 'active']);
 
         return (int) db()->lastInsertId();
     }
@@ -67,6 +81,12 @@ class UserModel
             json_response(['error' => 'Contul este blocat.'], 403);
         }
 
+        $role = self::roleForEmail($email);
+
+        if ($role === 'admin') {
+        db()->prepare('UPDATE users SET role = ? WHERE id = ?')->execute(['admin', $user['id']]);
+        }
+
         return (int) $user['id'];
     }
     
@@ -77,8 +97,10 @@ class UserModel
         $existingId = $stmt->fetchColumn();
 
         if ($existingId) {
-            db()->prepare('UPDATE users SET name = ?, email = ? WHERE id = ?')
-                ->execute([$name, $email, $existingId]);
+           $role = self::roleForEmail($email);
+
+            db()->prepare('UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?')
+                ->execute([$name, $email, $role, $existingId]);
 
             return (int) $existingId;
         }
@@ -87,7 +109,8 @@ class UserModel
         'INSERT INTO users (provider, provider_id, name, email, role, status)
          VALUES (?, ?, ?, ?, ?, ?)'
     );
-    $stmt->execute([$provider, $providerId, $name, $email, 'member', 'active']);
+    $role = self::roleForEmail($email);
+    $stmt->execute([$provider, $providerId, $name, $email, $role, 'active']);
 
     return (int) db()->lastInsertId();
 }

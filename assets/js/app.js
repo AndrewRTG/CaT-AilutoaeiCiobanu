@@ -100,7 +100,7 @@ function saveTokenFromUrl() {
     return params;
   }
 
-  async function loadSession() {
+  async function loadSession() { //nu e pe sesiuni ci pe token, dar tot trebuie sa incarc userul daca am token
     const session = await request('api/session.php');
     currentUser = session.user;
   }
