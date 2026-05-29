@@ -69,15 +69,7 @@ function slug(string $text): string
     return $slug !== '' ? $slug : 'camping-' . time();
 }
 
-function csrf_token(): string
-{
-    return '';
-}
 
-function check_csrf(): void
-{
-    return;
-}
 
 function current_user(): ?array
 {

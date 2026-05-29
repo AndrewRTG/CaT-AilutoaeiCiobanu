@@ -6,7 +6,6 @@ declare(strict_types=1);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
   <title>CaT - Camping Info Web Tool</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="assets/css/style.css">
