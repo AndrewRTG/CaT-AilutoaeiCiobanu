@@ -53,6 +53,15 @@ class DatabaseModel
             updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         )");
 
+        $db->exec("CREATE TABLE IF NOT EXISTS auth_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    token_hash TEXT NOT NULL UNIQUE,
+    expires_at TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+)");
+
         $db->exec("CREATE TABLE IF NOT EXISTS campings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,

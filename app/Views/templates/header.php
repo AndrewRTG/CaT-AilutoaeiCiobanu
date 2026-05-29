@@ -32,14 +32,9 @@ declare(strict_types=1);
         <a class="nav-btn <?= $page === 'admin' ? 'active' : '' ?>" href="index.php?page=admin">Admin</a>
       </nav>
 
-      <div class="actions">
-        <?php if ($user): ?>
-          <span class="user-pill"><?= e($user['name']) ?> · <?= e($user['role']) ?></span>
-          <a class="btn btn-ghost" href="auth/logout.php">Logout</a>
-        <?php else: ?>
-          <a class="btn btn-ghost" href="index.php?page=auth">Intra in cont</a>
-        <?php endif; ?>
-      </div>
+      <div class="actions" id="authActions">
+  <a class="btn btn-ghost" href="index.php?page=auth">Intra in cont</a>
+</div>
     </div>
 
     <div class="shell mobile-panel" id="mobilePanel">

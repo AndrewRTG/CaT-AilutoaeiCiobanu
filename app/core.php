@@ -5,16 +5,14 @@ const DB_FILE = __DIR__ . '/../storage/cat.sqlite';
 const UPLOAD_DIR = __DIR__ . '/../storage/uploads';
 const UPLOAD_URL = 'storage/uploads';
 
-require_once __DIR__ . '/Models/SessionModel.php';
 
-session_name('cat_session');
-SessionModel::register();
-session_start();
 
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 
 require_once __DIR__ . '/Models/UserModel.php';
+
+require_once __DIR__ . '/Models/AuthTokenModel.php';
 require_once __DIR__ . '/Models/CampingModel.php';
 require_once __DIR__ . '/Models/ReviewModel.php';
 require_once __DIR__ . '/Models/MessageModel.php';
@@ -73,28 +71,17 @@ function slug(string $text): string
 
 function csrf_token(): string
 {
-    if (empty($_SESSION['csrf'])) {
-        $_SESSION['csrf'] = bin2hex(random_bytes(16));
-    }
-
-    return $_SESSION['csrf'];
+    return '';
 }
 
 function check_csrf(): void
 {
-    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
-        return;
-    }
-
-    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_POST['csrf'] ?? '');
-    if (!hash_equals($_SESSION['csrf'] ?? '', (string) $token)) {
-        json_response(['error' => 'Token CSRF invalid.'], 403);
-    }
+    return;
 }
 
 function current_user(): ?array
 {
-    return UserModel::current();
+    return AuthTokenModel::userFromToken(bearer_token());
 }
 
 function require_login(): array
@@ -152,6 +139,22 @@ function save_upload(string $field): array
     move_uploaded_file($file['tmp_name'], UPLOAD_DIR . '/' . $name);
 
     return ['type' => $types[$ext], 'path' => UPLOAD_URL . '/' . $name];
+}
+
+function bearer_token(): ?string
+{
+    $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+
+    if (!$header && function_exists('apache_request_headers')) {
+        $headers = apache_request_headers();
+        $header = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    }
+
+    if (preg_match('/Bearer\s+(.+)/i', $header, $matches)) {
+        return trim($matches[1]);
+    }
+
+    return null;
 }
 
 db();

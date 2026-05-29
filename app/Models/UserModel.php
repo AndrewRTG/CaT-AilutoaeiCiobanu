@@ -5,15 +5,7 @@ class UserModel
 {
     public static function current(): ?array
     {
-        if (empty($_SESSION['user_id'])) {
-            return null;
-        }
-
-        $stmt = db()->prepare('SELECT id, name, email, role, provider, status FROM users WHERE id = ?');
-        $stmt->execute([(int) $_SESSION['user_id']]);
-        $user = $stmt->fetch();
-
-        return $user ?: null;
+    return AuthTokenModel::userFromToken(bearer_token());
     }
 
     public static function demoUserId(string $role): int

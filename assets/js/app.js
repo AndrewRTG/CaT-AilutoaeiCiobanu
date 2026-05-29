@@ -1,8 +1,7 @@
 (function () {
   const bootstrapNode = document.getElementById('bootstrap-data');
   const bootstrap = bootstrapNode ? JSON.parse(bootstrapNode.textContent || '{}') : {};
-  const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-  const legacyPage = location.hash.replace('#', '');
+ const legacyPage = location.hash.replace('#', '');
 
   if (legacyPage && !new URLSearchParams(location.search).has('page')) {
     const pages = ['home', 'campings', 'map', 'compare', 'community', 'admin', 'auth'];
@@ -12,12 +11,24 @@
     }
   }
 
-  let csrfToken = csrfMeta ? csrfMeta.content : '';
-  let currentUser = bootstrap.user || null;
-  let campings = [];
-  let zones = [];
-  let map = null;
-  let mapMarkers = [];
+  let authToken = localStorage.getItem('cat_token') || '';
+let currentUser = bootstrap.user || null;
+let campings = [];
+let zones = [];
+let map = null;
+let mapMarkers = [];
+
+function saveTokenFromUrl() {
+  const params = new URLSearchParams(location.search);
+  const token = params.get('token');
+
+  if (token) {
+    localStorage.setItem('cat_token', token);
+    authToken = token;
+    history.replaceState(null, '', 'index.php?page=campings');
+    window.location.href = 'index.php?page=campings';
+  }
+}
 
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -43,8 +54,11 @@
   }
 
   async function request(path, options = {}) {
-    const headers = options.headers ? { ...options.headers } : {};
-    headers['X-CSRF-Token'] = csrfToken;
+   const headers = options.headers ? { ...options.headers } : {};
+
+   if (authToken) {
+  headers.Authorization = 'Bearer ' + authToken;
+   }
 
     let body = options.body;
     if (options.json) {
@@ -71,9 +85,7 @@
     if (!response.ok) {
       throw new Error(payload.error || 'Cererea a esuat.');
     }
-    if (payload.csrf_token) {
-      csrfToken = payload.csrf_token;
-    }
+    
 
     return payload;
   }
@@ -380,6 +392,40 @@
     window.location.href = 'index.php?page=auth';
     return false;
   }
+
+  function renderAuthActions() {
+  const box = $('#authActions');
+
+  if (!box) {
+    return;
+  }
+
+  if (!currentUser) {
+    box.innerHTML = '<a class="btn btn-ghost" href="index.php?page=auth">Intra in cont</a>';
+    return;
+  }
+
+  box.innerHTML = `
+    <span class="user-pill">${escapeHtml(currentUser.name)} · ${escapeHtml(currentUser.role)}</span>
+    <button class="btn btn-ghost" type="button" id="logoutButton">Logout</button>
+  `;
+
+  const logoutButton = $('#logoutButton');
+
+  if (logoutButton) {
+    logoutButton.addEventListener('click', async () => {
+      try {
+        await request('auth/logout.php', { method: 'POST' });
+      } catch (error) {
+      }
+
+      localStorage.removeItem('cat_token');
+      authToken = '';
+      currentUser = null;
+      window.location.href = 'index.php?page=home';
+    });
+  }
+}
 
   function bindBasicUI() {
     const mobileMenu = $('#mobileMenu');
@@ -766,15 +812,18 @@
   }
 
   async function init() {
-    bindBasicUI();
-    bindHomePage();
-    bindCampingsPage();
-    bindDetailForms();
-    bindCommunityForm();
-    bindAdmin();
+  saveTokenFromUrl();
+
+  bindBasicUI();
+  bindHomePage();
+  bindCampingsPage();
+  bindDetailForms();
+  bindCommunityForm();
+  bindAdmin();
 
     try {
       await loadSession();
+      renderAuthActions();
       const listParams = new URLSearchParams(location.search);
       listParams.delete('page');
       listParams.delete('id');

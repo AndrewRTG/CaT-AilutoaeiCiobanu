@@ -6,18 +6,16 @@ class AuthController
     public static function login(): void
     {
         $provider = $_GET['provider'] ?? 'demo_user';
-        $_SESSION['user_id'] = UserModel::demoUserId($provider === 'demo_admin' ? 'admin' : 'member');
-        csrf_token();
+        $userId = UserModel::demoUserId($provider === 'demo_admin' ? 'admin' : 'member');
+        $token = AuthTokenModel::createForUser($userId);
 
-        header('Location: ../index.php?page=campings');
+        header('Location: ../index.php?page=auth&token=' . urlencode($token));
         exit;
     }
 
     public static function logout(): void
     {
-        session_destroy();
-
-        header('Location: ../index.php?page=home');
-        exit;
+        AuthTokenModel::revoke(bearer_token());
+        json_response(['ok' => true]);
     }
 }

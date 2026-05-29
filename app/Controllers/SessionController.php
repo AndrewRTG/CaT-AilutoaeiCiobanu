@@ -7,7 +7,6 @@ class SessionController
     {
         json_response([
             'user' => current_user(),
-            'csrf_token' => csrf_token(),
         ]);
     }
 }
