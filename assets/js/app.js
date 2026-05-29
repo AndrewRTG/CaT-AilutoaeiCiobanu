@@ -442,6 +442,72 @@ function saveTokenFromUrl() {
       }
     }
   }
+  function bindAuthForms() {
+  const loginForm = $('#loginForm');
+  const registerForm = $('#registerForm');
+
+  async function finishAuth(payload) {
+    localStorage.setItem('cat_token', payload.token);
+    authToken = payload.token;
+    currentUser = payload.user;
+    renderAuthActions();
+    showToast('Autentificare reusita.');
+    window.location.href = 'index.php?page=campings';
+  }
+
+  if (loginForm) {
+    loginForm.addEventListener('submit', async event => {
+      event.preventDefault();
+
+      const data = new FormData(loginForm);
+
+      try {
+        const payload = await request('api/auth.php', {
+          method: 'POST',
+          json: {
+            action: 'login',
+            email: data.get('email'),
+            password: data.get('password'),
+          },
+        });
+
+        await finishAuth(payload);
+      } catch (error) {
+        showToast(error.message);
+      }
+    });
+  }
+
+  if (registerForm) {
+    registerForm.addEventListener('submit', async event => {
+      event.preventDefault();
+
+      const data = new FormData(registerForm);
+
+      if (data.get('password') !== data.get('confirm_password')) {
+        showToast('Parolele nu coincid.');
+        return;
+      }
+
+      try {
+        const payload = await request('api/auth.php', {
+          method: 'POST',
+          json: {
+            action: 'register',
+            name: data.get('name'),
+            email: data.get('email'),
+            password: data.get('password'),
+            confirm_password: data.get('confirm_password'),
+          },
+        });
+
+        await finishAuth(payload);
+      } catch (error) {
+        showToast(error.message);
+      }
+    });
+  }
+}
 
   function bindCampingsPage() {
     const form = $('#filtersForm');
@@ -815,6 +881,7 @@ function saveTokenFromUrl() {
   saveTokenFromUrl();
 
   bindBasicUI();
+  bindAuthForms();
   bindHomePage();
   bindCampingsPage();
   bindDetailForms();

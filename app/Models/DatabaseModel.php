@@ -35,16 +35,17 @@ class DatabaseModel
         $db = self::$db;
 
         $db->exec("CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            provider TEXT NOT NULL,
-            provider_id TEXT NOT NULL,
-            name TEXT NOT NULL,
-            email TEXT,
-            role TEXT NOT NULL DEFAULT 'member',
-            status TEXT NOT NULL DEFAULT 'active',
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(provider, provider_id)
-        )");
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        provider TEXT NOT NULL,
+        provider_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        email TEXT,
+        password_hash TEXT,
+        role TEXT NOT NULL DEFAULT 'member',
+        status TEXT NOT NULL DEFAULT 'active',
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(provider, provider_id)
+    )");
 
         $db->exec("CREATE TABLE IF NOT EXISTS sessions (
             id TEXT PRIMARY KEY,
@@ -80,6 +81,7 @@ class DatabaseModel
 
         self::addMissingColumn('campings', 'facilities', "TEXT NOT NULL DEFAULT ''");
         self::addMissingColumn('users', 'status', "TEXT NOT NULL DEFAULT 'active'");
+        self::addMissingColumn('users', 'password_hash', "TEXT");
 
         $db->exec("CREATE TABLE IF NOT EXISTS reservations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
