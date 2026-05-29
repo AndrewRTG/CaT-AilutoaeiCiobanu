@@ -24,7 +24,6 @@ Proiectul este organizat in arhitectura **MVC simpla**, fara framework.
 - Import/export CSV si JSON.
 - Export statistici SVG si raport PDF simplu.
 - Login demo local pentru membru si admin.
-- Sesiuni PHP salvate in tabela SQLite `sessions`.
 
 ## Tehnologii
 
