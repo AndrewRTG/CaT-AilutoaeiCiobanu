@@ -43,36 +43,85 @@ class CampingModel
     }
 
     public static function save(array $data, ?int $id = null): int
-    {
-        $name = clean($data['name'] ?? '', 120);
-        $facilities = $data['facilities'] ?? '';
-        if (is_array($facilities)) {
-            $facilities = implode(',', array_map('clean', $facilities));
-        }
+{
+    $name = clean($data['name'] ?? '', 120);
 
-        $values = [
-            $name,
-            slug($name . '-' . ($id ?: uniqid())),
-            clean($data['zone'] ?? '', 80),
-            clean($data['description'] ?? '', 2000),
-            (float) ($data['price_per_night'] ?? 0),
-            (float) ($data['rating'] ?? 0),
-            (float) ($data['latitude'] ?? 0),
-            (float) ($data['longitude'] ?? 0),
-            clean($data['image_url'] ?? 'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?auto=format&fit=crop&w=1000&q=80', 500),
-            (int) ($data['capacity'] ?? 30),
-            clean($facilities, 500),
-        ];
-
-        if ($id) {
-            $values[] = $id;
-            db()->prepare('UPDATE campings SET name=?, slug=?, zone=?, description=?, price_per_night=?, rating=?, latitude=?, longitude=?, image_url=?, capacity=?, facilities=? WHERE id=?')->execute($values);
-            return $id;
-        }
-
-        db()->prepare('INSERT INTO campings (name, slug, zone, description, price_per_night, rating, latitude, longitude, image_url, capacity, facilities) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')->execute($values);
-        return (int) db()->lastInsertId();
+    if ($name === '') {
+        json_response(['error' => 'Numele campingului este obligatoriu.'], 422);
     }
+
+    $zone = clean($data['zone'] ?? '', 80);
+    if ($zone === '') {
+        json_response(['error' => 'Zona este obligatorie.'], 422);
+    }
+
+    $description = clean($data['description'] ?? '', 2000);
+    if ($description === '') {
+        json_response(['error' => 'Descrierea este obligatorie.'], 422);
+    }
+
+    $price = (float) ($data['price_per_night'] ?? 0);
+    if ($price <= 0) {
+        json_response(['error' => 'Pretul trebuie sa fie mai mare decat 0.'], 422);
+    }
+
+    $capacity = (int) ($data['capacity'] ?? 30);
+    if ($capacity < 1) {
+        json_response(['error' => 'Capacitatea trebuie sa fie cel putin 1.'], 422);
+    }
+
+    $latitude = (float) ($data['latitude'] ?? 0);
+    $longitude = (float) ($data['longitude'] ?? 0);
+
+    if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
+        json_response(['error' => 'Coordonate invalide.'], 422);
+    }
+
+    $facilities = $data['facilities'] ?? '';
+
+    if (is_array($facilities)) {
+        $facilities = implode(',', array_map('clean', $facilities));
+    }
+
+    $imageUrl = clean($data['image_url'] ?? '', 500);
+
+    if ($imageUrl === '') {
+        $imageUrl = 'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?auto=format&fit=crop&w=1000&q=80';
+    }
+
+    $values = [
+        $name,
+        slug($name . '-' . ($id ?: uniqid())),
+        $zone,
+        $description,
+        $price,
+        (float) ($data['rating'] ?? 0),
+        $latitude,
+        $longitude,
+        $imageUrl,
+        $capacity,
+        clean($facilities, 500),
+    ];
+
+    if ($id) {
+        $values[] = $id;
+
+        db()->prepare(
+            'UPDATE campings
+             SET name=?, slug=?, zone=?, description=?, price_per_night=?, rating=?, latitude=?, longitude=?, image_url=?, capacity=?, facilities=?
+             WHERE id=?'
+        )->execute($values);
+
+        return $id;
+    }
+
+    db()->prepare(
+        'INSERT INTO campings (name, slug, zone, description, price_per_night, rating, latitude, longitude, image_url, capacity, facilities)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    )->execute($values);
+
+    return (int) db()->lastInsertId();
+}
 
     public static function delete(int $id): void
     {

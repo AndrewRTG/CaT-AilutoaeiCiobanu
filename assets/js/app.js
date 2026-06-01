@@ -784,33 +784,33 @@ function saveTokenFromUrl() {
     const form = $('#campingForm');
     if (form) {
       form.addEventListener('submit', async event => {
-        event.preventDefault();
-        try {
-          const data = new FormData(form);
-          const id = $('#campingEditId').value;
-          await request(id ? 'api/campings.php?id=' + encodeURIComponent(id) : 'api/campings.php', {
-            method: id ? 'PATCH' : 'POST',
-            json: {
-              name: data.get('name'),
-              zone: data.get('zone'),
-              price_per_night: data.get('price_per_night'),
-              capacity: data.get('capacity'),
-              latitude: data.get('latitude'),
-              longitude: data.get('longitude'),
-              image_url: data.get('image_url'),
-              facilities: String(data.get('facilities') || '').split(',').map(item => item.trim()).filter(Boolean),
-              description: data.get('description'),
-            },
-          });
-          resetCampingForm();
-          await loadCampings();
-          await loadAdmin();
-          showToast('Campingul a fost salvat.');
-        } catch (error) {
-          showToast(error.message);
+      event.preventDefault();
+
+      try {
+        const data = new FormData(form);
+        const id = $('#campingEditId').value;
+
+        let url = 'api/campings.php';
+
+        if (id) {
+          url += '?id=' + encodeURIComponent(id);
+          data.append('_method', 'PATCH');
         }
-      });
-    }
+
+        await request(url, {
+          method: 'POST',
+          body: data,
+        });
+
+        resetCampingForm();
+        await loadCampings();
+        await loadAdmin();
+        showToast('Campingul a fost salvat.');
+      } catch (error) {
+        showToast(error.message);
+      }
+    });
+}
 
     const importForm = $('#importForm');
     if (importForm) {
@@ -841,7 +841,6 @@ function saveTokenFromUrl() {
         form.capacity.value = camping.capacity;
         form.latitude.value = camping.latitude;
         form.longitude.value = camping.longitude;
-        form.image_url.value = camping.image_url;
         form.facilities.value = camping.facilities.join(', ');
         form.description.value = camping.description;
         $('#campingEditId').value = camping.id;

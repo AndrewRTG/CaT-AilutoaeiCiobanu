@@ -7,15 +7,22 @@ class CampingController
     {
         $method = $_SERVER['REQUEST_METHOD'];
 
+        if ($method === 'POST' && isset($_POST['_method'])) {
+            $method = strtoupper((string) $_POST['_method']);
+        }
+
         if ($method === 'GET') {
             self::indexOrShow();
         }
+
         if ($method === 'POST') {
             self::create();
         }
+
         if ($method === 'PATCH') {
             self::update();
         }
+
         if ($method === 'DELETE') {
             self::delete();
         }
@@ -28,6 +35,7 @@ class CampingController
         if (!empty($_GET['id'])) {
             $id = (int) $_GET['id'];
             $camping = CampingModel::find($id);
+
             if (!$camping) {
                 json_response(['error' => 'Campingul nu exista.'], 404);
             }
@@ -48,27 +56,64 @@ class CampingController
     private static function create(): void
     {
         require_admin();
-        $id = CampingModel::save(body_json());
+
+        $data = self::requestData();
+        $imagePath = save_image_upload('image');
+
+        if ($imagePath) {
+            $data['image_url'] = $imagePath;
+        }
+
+        $id = CampingModel::save($data);
+
         json_response(['camping' => CampingModel::find($id)], 201);
     }
 
     private static function update(): void
     {
         require_admin();
+
         $id = (int) ($_GET['id'] ?? 0);
         $current = CampingModel::rawFind($id);
+
         if (!$current) {
             json_response(['error' => 'Campingul nu exista.'], 404);
         }
 
-        CampingModel::save(array_merge($current, body_json()), $id);
+        $data = array_merge($current, self::requestData());
+        $imagePath = save_image_upload('image');
+
+        if ($imagePath) {
+            $data['image_url'] = $imagePath;
+        } else {
+            $data['image_url'] = $current['image_url'];
+        }
+
+        CampingModel::save($data, $id);
+
         json_response(['ok' => true]);
     }
 
     private static function delete(): void
     {
         require_admin();
-        CampingModel::delete((int) ($_GET['id'] ?? 0));
+
+        $id = (int) ($_GET['id'] ?? 0);
+
+        if ($id <= 0) {
+            json_response(['error' => 'Camping invalid.'], 422);
+        }
+
+        CampingModel::delete($id);
         json_response(['ok' => true]);
+    }
+
+    private static function requestData(): array
+    {
+        if (!empty($_POST)) {
+            return $_POST;
+        }
+
+        return body_json();
     }
 }
