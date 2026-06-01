@@ -14,11 +14,7 @@ class ReservationController
         if ($method === 'POST') {
             $user = require_login();
             $data = body_json();
-
-            if (($data['start_date'] ?? '') >= ($data['end_date'] ?? '')) {
-                json_response(['error' => 'Data de final trebuie sa fie dupa data de inceput.'], 422);
-            }
-
+            
             ReservationModel::create($user['id'], $data);
             json_response(['ok' => true], 201);
         }

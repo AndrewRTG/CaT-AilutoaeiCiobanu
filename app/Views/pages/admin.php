@@ -38,7 +38,7 @@
         </section>
 
         <section class="admin-section" id="admin-offers">
-          <form class="panel" id="campingForm">
+          <form class="panel" id="campingForm" enctype="multipart/form-data">
             <h3 id="campingFormTitle">Adauga camping</h3>
             <input type="hidden" name="camping_id" id="campingEditId">
             <div class="form-grid">
@@ -48,7 +48,10 @@
               <label class="field"><span>Capacitate</span><input type="number" min="1" name="capacity" value="30"></label>
               <label class="field"><span>Latitudine</span><input type="number" step="0.000001" name="latitude" required></label>
               <label class="field"><span>Longitudine</span><input type="number" step="0.000001" name="longitude" required></label>
-              <label class="field wide"><span>Imagine URL</span><input name="image_url" placeholder="https://..."></label>
+            <label class="field wide">
+              <span>Imagine camping</span>
+              <input type="file" name="image" accept="image/jpeg,image/png,image/webp">
+            </label>
               <label class="field wide"><span>Facilitati</span><input name="facilities" placeholder="Wi-Fi, Dusuri, Parcare"></label>
               <label class="field wide"><span>Descriere</span><textarea rows="4" name="description" required></textarea></label>
             </div>

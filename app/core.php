@@ -142,6 +142,51 @@ function save_upload(string $field): array
     return ['type' => $types[$ext], 'path' => UPLOAD_URL . '/' . $name];
 }
 
+
+function save_image_upload(string $field): ?string
+{
+    if (empty($_FILES[$field]) || $_FILES[$field]['error'] === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+
+    $file = $_FILES[$field];
+
+    if ($file['error'] !== UPLOAD_ERR_OK || $file['size'] > 5 * 1024 * 1024) {
+        json_response(['error' => 'Imagine invalida sau prea mare. Maxim 5 MB.'], 400);
+    }
+
+    $mime = '';
+
+    if (function_exists('finfo_open')) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $file['tmp_name']) ?: '';
+        finfo_close($finfo);
+    }
+
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+    ];
+
+    if (!isset($allowed[$mime])) {
+        json_response(['error' => 'Sunt acceptate doar imagini JPG, PNG sau WEBP.'], 400);
+    }
+
+    if (!is_dir(UPLOAD_DIR)) {
+        mkdir(UPLOAD_DIR, 0775, true);
+    }
+
+    $name = date('YmdHis') . '-' . bin2hex(random_bytes(6)) . '.' . $allowed[$mime];
+    $destination = UPLOAD_DIR . '/' . $name;
+
+    if (!move_uploaded_file($file['tmp_name'], $destination)) {
+        json_response(['error' => 'Imaginea nu a putut fi salvata.'], 500);
+    }
+
+    return UPLOAD_URL . '/' . $name;
+}
+
 function bearer_token(): ?string
 {
     $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
