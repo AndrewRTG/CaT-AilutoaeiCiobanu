@@ -12,11 +12,13 @@
   }
 
   let authToken = localStorage.getItem('cat_token') || '';
-let currentUser = bootstrap.user || null;
-let campings = [];
-let zones = [];
-let map = null;
-let mapMarkers = [];
+  let currentUser = bootstrap.user || null;
+  let campings = [];
+  let zones = [];
+  let map = null;
+  let mapMarkers = [];
+  const COMPARE_KEY = 'cat_compare';
+  let compareIds = loadCompareIds();
 
 function saveTokenFromUrl() {
   const params = new URLSearchParams(location.search);
@@ -99,6 +101,56 @@ function saveTokenFromUrl() {
     });
     return params;
   }
+
+  function loadCompareIds() {
+  try {
+    const data = JSON.parse(localStorage.getItem(COMPARE_KEY) || '[]');
+    return Array.isArray(data) ? data.map(Number).filter(Number.isFinite) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveCompareIds() {
+  localStorage.setItem(COMPARE_KEY, JSON.stringify(compareIds));
+}
+
+function isCompared(id) {
+  return compareIds.includes(Number(id));
+}
+
+function comparedCampings() {
+  return compareIds
+    .map(id => campings.find(camping => Number(camping.id) === Number(id)))
+    .filter(Boolean);
+}
+
+function toggleCompare(id) {
+  id = Number(id);
+
+  if (isCompared(id)) {
+    compareIds = compareIds.filter(item => Number(item) !== id);
+    saveCompareIds();
+    showToast('Camping scos din comparare.');
+    return;
+  }
+
+  if (compareIds.length >= 3) {
+    showToast('Poti compara maxim 3 campinguri.');
+    return;
+  }
+
+  compareIds.push(id);
+  saveCompareIds();
+  showToast('Camping adaugat la comparare.');
+}
+
+function refreshCompareUI() {
+  renderCampings();
+  renderCompare();
+  renderMapList();
+  updateMapPopups();
+}
 
   async function loadSession() { //nu e pe sesiuni ci pe token, dar tot trebuie sa incarc userul daca am token
     const session = await request('api/session.php');
@@ -186,6 +238,9 @@ function saveTokenFromUrl() {
           <div class="camp-footer">
             <div class="price"><strong>${Number(camping.price_per_night).toFixed(0)} RON</strong><span>pe noapte</span></div>
             <a class="btn btn-primary" href="index.php?page=detail&id=${camping.id}">Vezi</a>
+            <button class="btn btn-soft" type="button" data-compare-toggle="${camping.id}">
+              ${isCompared(camping.id) ? 'Scoate' : 'Compara'}
+            </button>
           </div>
         </div>
       </article>
@@ -274,31 +329,57 @@ function saveTokenFromUrl() {
   }
 
   function renderCompare() {
-    const table = $('#compareTable');
-    if (!table) {
-      return;
-    }
+  const table = $('#compareTable');
 
-    const selected = campings.slice(0, 3);
-    if (!selected.length) {
-      table.innerHTML = '<tbody><tr><td>Nu exista campinguri de comparat.</td></tr></tbody>';
-      return;
-    }
-
-    const rows = [
-      ['Zona', ...selected.map(camping => camping.zone)],
-      ['Pret/noapte', ...selected.map(camping => `${Number(camping.price_per_night).toFixed(0)} RON`)],
-      ['Rating', ...selected.map(camping => `★ ${Number(camping.rating).toFixed(1)}`)],
-      ['Capacitate', ...selected.map(camping => `${camping.capacity} persoane`)],
-      ['Facilitati', ...selected.map(camping => camping.facilities.slice(0, 4).join(', '))],
-    ];
-
-    table.innerHTML = `
-      <thead><tr><th>Criteriu</th>${selected.map(camping => `<th>${escapeHtml(camping.name)}</th>`).join('')}</tr></thead>
-      <tbody>${rows.map(row => `<tr>${row.map(cell => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')}</tbody>
-    `;
+  if (!table) {
+    return;
   }
 
+  const selected = comparedCampings();
+
+  if (!selected.length) {
+    table.innerHTML = `
+      <tbody>
+        <tr>
+          <td>
+            Nu ai selectat campinguri pentru comparare.
+            <a class="btn btn-soft" href="index.php?page=campings">Alege campinguri</a>
+          </td>
+        </tr>
+      </tbody>
+    `;
+    return;
+  }
+
+  const rows = [
+    ['Zona', ...selected.map(camping => camping.zone)],
+    ['Pret/noapte', ...selected.map(camping => `${Number(camping.price_per_night).toFixed(0)} RON`)],
+    ['Rating', ...selected.map(camping => `★ ${Number(camping.rating).toFixed(1)}`)],
+    ['Capacitate', ...selected.map(camping => `${camping.capacity} persoane`)],
+    ['Facilitati', ...selected.map(camping => camping.facilities.slice(0, 4).join(', '))],
+  ];
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Criteriu</th>
+        ${selected.map(camping => `<th>${escapeHtml(camping.name)}</th>`).join('')}
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map(row => `<tr>${row.map(cell => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')}
+      <tr>
+        <td>Actiuni</td>
+        ${selected.map(camping => `
+          <td>
+            <a class="btn btn-soft" href="index.php?page=detail&id=${camping.id}">Vezi</a>
+            <button class="btn btn-danger" type="button" data-compare-remove="${camping.id}">Scoate</button>
+          </td>
+        `).join('')}
+      </tr>
+    </tbody>
+  `;
+}
   function renderMapList() {
     const list = $('#mapList');
     if (!list) {
@@ -311,11 +392,27 @@ function saveTokenFromUrl() {
         <div>
           <h4>${escapeHtml(camping.name)}</h4>
           <p>${escapeHtml(camping.zone)} · ★ ${Number(camping.rating).toFixed(1)} · ${Number(camping.price_per_night).toFixed(0)} RON</p>
-          <a class="btn btn-soft" href="index.php?page=detail&id=${camping.id}">Detalii</a>
+         <a class="btn btn-soft" href="index.php?page=detail&id=${camping.id}">Detalii</a>
+          <button class="btn btn-soft" type="button" data-compare-toggle="${camping.id}">
+            ${isCompared(camping.id) ? 'Scoate' : 'Compara'}
+          </button>
         </div>
       </article>
     `).join('');
   }
+
+
+  function mapPopupHtml(camping) {
+  return `
+    <strong>${escapeHtml(camping.name)}</strong><br>
+    ${escapeHtml(camping.zone)}<br>
+    ★ ${Number(camping.rating).toFixed(1)} · ${Number(camping.price_per_night).toFixed(0)} RON/noapte<br>
+    <a class="btn btn-soft" href="index.php?page=detail&id=${camping.id}">Detalii</a>
+    <button class="btn btn-soft" type="button" data-compare-toggle="${camping.id}">
+      ${isCompared(camping.id) ? 'Scoate' : 'Compara'}
+    </button>
+  `;
+}
 
   function renderMap() {
     const mapEl = $('#osmMap');
@@ -336,11 +433,8 @@ function saveTokenFromUrl() {
 
     mapMarkers = campings.map(camping => {
       const marker = L.marker([camping.latitude, camping.longitude]).addTo(map);
-      marker.bindPopup(`
-        <strong>${escapeHtml(camping.name)}</strong><br>
-        ${escapeHtml(camping.zone)}<br>
-        ★ ${Number(camping.rating).toFixed(1)} · ${Number(camping.price_per_night).toFixed(0)} RON/noapte
-      `);
+     marker.bindPopup(mapPopupHtml(camping));
+     marker.campingId = Number(camping.id);
       marker.on('click', () => highlightMapCamping(camping.id));
       return marker;
     });
@@ -349,6 +443,20 @@ function saveTokenFromUrl() {
       map.fitBounds(L.featureGroup(mapMarkers).getBounds().pad(0.2));
     }
   }
+
+  function updateMapPopups() {
+  if (!mapMarkers.length) {
+    return;
+  }
+
+  mapMarkers.forEach(marker => {
+    const camping = campings.find(item => Number(item.id) === Number(marker.campingId));
+
+    if (camping) {
+      marker.setPopupContent(mapPopupHtml(camping));
+    }
+  });
+}
 
   function highlightMapCamping(id) {
     $$('.map-place').forEach(item => item.classList.toggle('active', Number(item.dataset.mapCamping) === Number(id)));
@@ -392,6 +500,32 @@ function saveTokenFromUrl() {
     window.location.href = 'index.php?page=auth';
     return false;
   }
+
+  function bindMapListActions() {
+  document.addEventListener('click', event => {
+    const card = event.target.closest('[data-map-camping]');
+
+    if (!card) {
+      return;
+    }
+
+    if (event.target.closest('a') || event.target.closest('button')) {
+      return;
+    }
+
+    const id = Number(card.dataset.mapCamping);
+    const camping = campings.find(item => Number(item.id) === id);
+    const marker = mapMarkers.find(item => Number(item.campingId) === id);
+
+    if (!camping || !marker || !map) {
+      return;
+    }
+
+    map.setView([camping.latitude, camping.longitude], 9);
+    marker.openPopup();
+    highlightMapCamping(id);
+  });
+}
 
   function renderAuthActions() {
   const box = $('#authActions');
@@ -532,6 +666,30 @@ function saveTokenFromUrl() {
       window.location.href = 'index.php?page=campings&' + params.toString();
     });
   }
+
+
+  function bindCompareActions() {
+  document.addEventListener('click', event => {
+    const toggleButton = event.target.closest('[data-compare-toggle]');
+
+    if (toggleButton) {
+      event.preventDefault();
+      toggleCompare(toggleButton.dataset.compareToggle);
+      refreshCompareUI();
+      return;
+    }
+
+    const removeButton = event.target.closest('[data-compare-remove]');
+
+    if (removeButton) {
+      event.preventDefault();
+      compareIds = compareIds.filter(id => Number(id) !== Number(removeButton.dataset.compareRemove));
+      saveCompareIds();
+      refreshCompareUI();
+      showToast('Camping scos din comparare.');
+    }
+  });
+}
 
   function bindHomePage() {
     const form = $('#quickSearchForm');
@@ -881,6 +1039,8 @@ function saveTokenFromUrl() {
 
   bindBasicUI();
   bindAuthForms();
+  bindCompareActions();
+  bindMapListActions();
   bindHomePage();
   bindCampingsPage();
   bindDetailForms();
