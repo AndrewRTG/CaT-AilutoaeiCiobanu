@@ -951,6 +951,47 @@ $('#periodChart').innerHTML = `
     $('#campingFormTitle').textContent = 'Adauga camping';
     $('#campingSubmit').textContent = 'Salveaza oferta';
   }
+  async function downloadExport(url) {
+  const headers = {};
+
+  if (authToken) {
+    headers.Authorization = 'Bearer ' + authToken;
+  }
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    let message = 'Exportul a esuat.';
+
+    try {
+      const payload = JSON.parse(text);
+      message = payload.error || message;
+    } catch (error) {
+    }
+
+    throw new Error(message);
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get('Content-Disposition') || '';
+  const match = disposition.match(/filename="?([^"]+)"?/);
+  const filename = match ? match[1] : 'cat-export';
+
+  const downloadUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = downloadUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(downloadUrl);
+}
 
   function bindAdmin() {
     const adminArea = $('#adminArea');
@@ -1020,6 +1061,24 @@ $('#periodChart').innerHTML = `
     }
 
     document.addEventListener('click', async event => {
+
+
+       const exportButton = event.target.closest('[data-export-url]');
+
+        if (exportButton) {
+          event.preventDefault();
+
+          try {
+            await downloadExport(exportButton.dataset.exportUrl);
+          } catch (error) {
+            showToast(error.message);
+          }
+
+          return;
+        }
+
+
+
       const edit = event.target.closest('[data-edit-camping]');
       if (edit) {
         const camping = campings.find(item => Number(item.id) === Number(edit.dataset.editCamping));

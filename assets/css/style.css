@@ -867,3 +867,36 @@ h3 {
     flex-direction: column;
   }
 }
+
+.export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: stretch;
+  max-width: 100%;
+}
+
+.export-actions .btn {
+  white-space: normal;
+  text-align: center;
+  line-height: 1.2;
+}
+
+#admin-exports .panel {
+  overflow: visible;
+}
+
+#admin-exports .grid-2 {
+  align-items: start;
+}
+
+#admin-exports .export-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 720px) {
+  #admin-exports .export-actions {
+    grid-template-columns: 1fr;
+  }
+}
