@@ -802,11 +802,12 @@ function refreshCompareUI() {
 
   function renderStats(stats) {
     const totals = stats.totals || {};
-    $('#adminStats').innerHTML = `
+      $('#adminStats').innerHTML = `
       <div class="stat-card"><span>Campinguri</span><strong>${totals.campings || 0}</strong></div>
       <div class="stat-card"><span>Utilizatori</span><strong>${totals.users || 0}</strong></div>
       <div class="stat-card"><span>Rezervari</span><strong>${totals.reservations || 0}</strong></div>
       <div class="stat-card"><span>Recenzii</span><strong>${totals.reviews || 0}</strong></div>
+      <div class="stat-card"><span>Mesaje</span><strong>${totals.messages || 0}</strong></div>
     `;
 
     const zonesStats = stats.zones || [];
@@ -829,6 +830,28 @@ function refreshCompareUI() {
       </svg>
     `;
 
+    const periodsStats = stats.periods || [];
+  const periodMax = Math.max(1, ...periodsStats.map(item => Number(item.total || 0)));
+
+  const periodBars = periodsStats.map((item, index) => {
+  const height = 140 * Number(item.total || 0) / periodMax;
+  const x = 76 + index * 96;
+  const y = 190 - height;
+
+    return `
+      <rect x="${x}" y="${y}" width="46" height="${height}" rx="6" fill="${index % 2 ? '#d9853b' : '#2f6b3f'}"></rect>
+      <text x="${x - 12}" y="220" font-size="12" fill="#65705f">${escapeHtml(item.period)}</text>
+    `;
+  }).join('');
+
+$('#periodChart').innerHTML = `
+  <svg width="100%" height="250" viewBox="0 0 620 250" role="img" aria-label="Perioade populare">
+    <rect width="620" height="250" rx="8" fill="#f7faf2"></rect>
+    <line x1="48" y1="190" x2="580" y2="190" stroke="#dbe4d1" stroke-width="2"></line>
+    ${periodBars || '<text x="70" y="130" font-size="16" fill="#65705f">Nu exista rezervari inca.</text>'}
+  </svg>
+`;
+
     $('#popularList').innerHTML = (stats.popular || []).map(item => `
       <div class="message">
         <div class="avatar">${escapeHtml(String(item.name).slice(0, 1))}</div>
@@ -838,6 +861,16 @@ function refreshCompareUI() {
         </div>
       </div>
     `).join('');
+    
+    $('#statusList').innerHTML = (stats.statuses || []).map(item => `
+  <div class="message">
+    <div class="avatar">${escapeHtml(String(item.status).slice(0, 1).toUpperCase())}</div>
+    <div>
+      <strong>${escapeHtml(item.status)}</strong>
+      <p>${Number(item.total || 0)} rezervari</p>
+    </div>
+  </div>
+`).join('') || '<p class="muted">Nu exista rezervari.</p>';
   }
 
   function renderAdminCampings() {

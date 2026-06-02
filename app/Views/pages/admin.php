@@ -83,22 +83,26 @@
 
         <section class="admin-section" id="admin-exports">
           <div class="grid-2">
-            <form class="panel" id="importForm" enctype="multipart/form-data">
-              <h3>Import campinguri</h3>
-              <p class="muted">Incarca un fisier cu campinguri si detaliile lor.</p>
-              <label class="field"><span>Fisier</span><input type="file" name="file" accept=".csv,.json" required></label>
-              <button class="btn btn-primary" type="submit">Importa</button>
-            </form>
-            <div class="panel">
-              <h3>Export date</h3>
-              <div class="export-actions">
-                <a class="btn btn-soft" href="api/export.php?format=csv&entity=campings">Lista campinguri</a>
-                <a class="btn btn-soft" href="api/export.php?format=json&entity=campings">Date campinguri</a>
-                <a class="btn btn-soft" href="api/export.php?format=svg">Grafic statistici</a>
-                <a class="btn btn-primary" href="api/export.php?format=pdf">Raport complet</a>
-              </div>
-            </div>
+          <div class="panel">
+            <h3>Zone populare</h3>
+            <div class="chart-wrap" id="svgChart"></div>
           </div>
+
+          <div class="panel">
+            <h3>Perioade populare</h3>
+            <div class="chart-wrap" id="periodChart"></div>
+          </div>
+
+          <div class="panel">
+            <h3>Top campinguri</h3>
+            <div id="popularList" class="feed-list"></div>
+          </div>
+
+          <div class="panel">
+            <h3>Status rezervari</h3>
+            <div id="statusList" class="feed-list"></div>
+          </div>
+        </div>
         </section>
       </div>
     </div>
