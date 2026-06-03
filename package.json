@@ -1,0 +1,26 @@
+{
+  "name": "cat",
+  "version": "1.0.0",
+  "description": "Aplicatie Web pentru rezervarea si gestionarea locurilor de camping.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndrewRTG/CaT-AilutoaeiCiobanu.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AndrewRTG/CaT-AilutoaeiCiobanu/issues"
+  },
+  "homepage": "https://github.com/AndrewRTG/CaT-AilutoaeiCiobanu#readme",
+   "scripts": {
+    "lint:css": "stylelint \"assets/css/**/*.css\"",
+    "lint:css:fix": "stylelint \"assets/css/**/*.css\" --fix"
+  },
+  "devDependencies": {
+    "stylelint": "^16.0.0",
+    "stylelint-config-standard": "^36.0.0"
+  }
+}

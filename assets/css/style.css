@@ -1,7 +1,7 @@
 :root {
   --bg: #f4f7ee;
   --bg-2: #e8f0dc;
-  --card: #ffffff;
+  --card: #fff;
   --text: #182018;
   --muted: #65705f;
   --green: #2f6b3f;
@@ -11,7 +11,7 @@
   --blue: #355f7a;
   --red: #b94b4b;
   --border: #dbe4d1;
-  --shadow: 0 16px 44px rgba(33, 55, 28, 0.10);
+  --shadow: 0 16px 44px rgb(33 55 28 / 10%);
   --max: 1180px;
 }
 
@@ -56,8 +56,8 @@ button {
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid rgba(220, 227, 210, 0.9);
-  background: rgba(245, 247, 239, 0.94);
+  border-bottom: 1px solid rgb(220 227 210 / 90%);
+  background: rgb(245 247 239 / 94%);
   backdrop-filter: blur(14px);
 }
 
@@ -115,7 +115,7 @@ button {
   padding: 6px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgb(255 255 255 / 78%);
 }
 
 .nav-btn {
@@ -154,7 +154,7 @@ button {
 .btn-primary {
   color: #fff;
   background: var(--green);
-  box-shadow: 0 12px 26px rgba(47, 107, 63, 0.18);
+  box-shadow: 0 12px 26px rgb(47 107 63 / 18%);
 }
 
 .btn-primary:hover {
@@ -224,8 +224,8 @@ button {
   padding: 8px 12px;
   border-radius: 8px;
   color: var(--green-2);
-  background: rgba(220, 235, 216, 0.82);
-  border: 1px solid rgba(47, 107, 63, 0.16);
+  background: rgb(220 235 216 / 82%);
+  border: 1px solid rgb(47 107 63 / 16%);
   font-size: 13px;
   font-weight: 800;
 }
@@ -270,7 +270,7 @@ h3 {
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgb(255 255 255 / 90%);
   box-shadow: var(--shadow);
 }
 
@@ -335,7 +335,7 @@ h3 {
   padding: 18px;
   border-radius: 8px;
   color: #fff;
-  background: rgba(20, 37, 24, 0.78);
+  background: rgb(20 37 24 / 78%);
   backdrop-filter: blur(14px);
 }
 
@@ -346,7 +346,7 @@ h3 {
 
 .hero-card span {
   margin-top: 6px;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgb(255 255 255 / 78%);
 }
 
 .mini-stats {
@@ -410,8 +410,8 @@ h3 {
 .auth-card {
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 14px 36px rgba(33, 55, 28, 0.08);
+  background: rgb(255 255 255 / 94%);
+  box-shadow: 0 14px 36px rgb(33 55 28 / 8%);
   overflow: hidden;
 }
 
@@ -681,7 +681,7 @@ h3 {
   width: 100%;
   padding: 12px;
   border-radius: 6px;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgb(255 255 255 / 78%);
   background: transparent;
   cursor: pointer;
   text-align: left;
@@ -691,7 +691,7 @@ h3 {
 .admin-tab:hover,
 .admin-tab.active {
   color: #fff;
-  background: rgba(255, 255, 255, 0.13);
+  background: rgb(255 255 255 / 13%);
 }
 
 .admin-content,
@@ -754,7 +754,7 @@ h3 {
 .footer {
   padding: 28px 0;
   border-top: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.68);
+  background: rgb(255 255 255 / 68%);
 }
 
 .footer-grid {
@@ -786,7 +786,7 @@ h3 {
   transform: translateX(-50%) translateY(0);
 }
 
-@media (max-width: 1100px) {
+@media (width <= 1100px) {
   .home-layout,
   .detail-layout,
   .map-layout,
@@ -807,7 +807,7 @@ h3 {
   }
 }
 
-@media (max-width: 760px) {
+@media (width <= 760px) {
   .shell {
     width: min(100% - 22px, var(--max));
   }
@@ -895,7 +895,7 @@ h3 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-@media (max-width: 720px) {
+@media (width <= 720px) {
   #admin-exports .export-actions {
     grid-template-columns: 1fr;
   }
