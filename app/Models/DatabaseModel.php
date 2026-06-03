@@ -25,7 +25,6 @@ class DatabaseModel
         self::$db->exec('PRAGMA busy_timeout = 5000');
 
         self::createTables();
-        //self::seedData();
 
         return self::$db;
     }
@@ -123,37 +122,5 @@ class DatabaseModel
         self::$db->exec("ALTER TABLE $table ADD COLUMN $column $definition");
     }
 
-    private static function seedData(): void
-    {
-        UserModel::demoUserId('admin');
-        UserModel::demoUserId('member');
 
-        if ((int) self::$db->query('SELECT COUNT(*) FROM campings')->fetchColumn() > 0) {
-            return;
-        }
-
-        $campings = [
-            ['Green Valley', 'Apuseni', 'Camping linistit la marginea padurii, cu trasee usoare si dusuri.', 120, 4.9, 46.5076, 22.8141, 'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?auto=format&fit=crop&w=1000&q=80', 45, 'Wi-Fi,Dusuri,Pet friendly,Foc de tabara'],
-            ['Lake Horizon', 'Bucovina', 'Camping langa lac, potrivit pentru caiac, pescuit si seri calme pe ponton.', 180, 4.7, 47.7009, 25.8876, 'https://images.unsplash.com/photo-1537905569824-f89f14cceb68?auto=format&fit=crop&w=1000&q=80', 30, 'Ponton,Caiac,Parcare,Electricitate'],
-            ['Forest Nest', 'Brasov', 'Camping aproape de trasee montane si puncte de belvedere.', 95, 4.6, 45.6427, 25.5887, 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1000&q=80', 25, 'Trasee,Gratar,Apa potabila,Zona hamace'],
-            ['Delta Wild Camp', 'Delta Dunarii', 'Camping pentru excursii pe canale si observarea naturii.', 150, 4.5, 45.1716, 29.3912, 'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=1000&q=80', 22, 'Barca,Ghid local,Foto hide,Dusuri'],
-        ];
-
-        foreach ($campings as $camping) {
-            $id = CampingModel::save([
-                'name' => $camping[0],
-                'zone' => $camping[1],
-                'description' => $camping[2],
-                'price_per_night' => $camping[3],
-                'rating' => $camping[4],
-                'latitude' => $camping[5],
-                'longitude' => $camping[6],
-                'image_url' => $camping[7],
-                'capacity' => $camping[8],
-                'facilities' => $camping[9],
-            ]);
-
-            ReviewModel::create(UserModel::demoUserId('member'), $id, 5, 'Experienta foarte buna, loc curat si usor de rezervat.', null, null);
-        }
-    }
 }
