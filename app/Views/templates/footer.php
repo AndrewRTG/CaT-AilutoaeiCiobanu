@@ -13,6 +13,7 @@ declare(strict_types=1);
         </span>
       </div>
       <a class="btn btn-ghost" href="index.php?page=compare">Compara campinguri</a>
+      <a class="btn btn-soft" href="api/rss.php" target="_blank">RSS</a>
     </div>
   </footer>
 
