@@ -1053,7 +1053,8 @@ $('#periodChart').innerHTML = `
           importForm.reset();
           await loadCampings();
           await loadAdmin();
-          showToast(`Import finalizat: ${payload.imported} campinguri.`);
+          console.log(payload.errors);
+showToast(`Import finalizat: ${payload.imported} campinguri. Erori: ${(payload.errors || []).length}`);
         } catch (error) {
           showToast(error.message);
         }
