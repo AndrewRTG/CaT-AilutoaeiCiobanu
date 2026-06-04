@@ -6,6 +6,21 @@ const UPLOAD_DIR = __DIR__ . '/../storage/uploads';
 const UPLOAD_URL = 'storage/uploads';
 $configFile = __DIR__ . '/../config/oauth.php';
 
+spl_autoload_register(function (string $class): void {
+    $paths = [
+        __DIR__ . '/Models/' . $class . '.php',
+        __DIR__ . '/Controllers/' . $class . '.php',
+        __DIR__ . '/Core/' . $class . '.php',
+    ];
+
+    foreach ($paths as $path) {
+        if (is_file($path)) {
+            require_once $path;
+            return;
+        }
+    }
+});
+
 if (is_file($configFile)) {
     require_once $configFile;
 }
@@ -18,27 +33,6 @@ if (!defined('ADMIN_EMAILS')) {
 
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
-
-require_once __DIR__ . '/Models/UserModel.php';
-
-require_once __DIR__ . '/Models/AuthTokenModel.php';
-require_once __DIR__ . '/Models/CampingModel.php';
-require_once __DIR__ . '/Models/ReviewModel.php';
-require_once __DIR__ . '/Models/MessageModel.php';
-require_once __DIR__ . '/Models/ReservationModel.php';
-require_once __DIR__ . '/Models/StatsModel.php';
-require_once __DIR__ . '/Models/DatabaseModel.php';
-
-require_once __DIR__ . '/Controllers/SessionController.php';
-require_once __DIR__ . '/Controllers/CampingController.php';
-require_once __DIR__ . '/Controllers/ReviewController.php';
-require_once __DIR__ . '/Controllers/MessageController.php';
-require_once __DIR__ . '/Controllers/ReservationController.php';
-require_once __DIR__ . '/Controllers/AdminUserController.php';
-require_once __DIR__ . '/Controllers/StatsController.php';
-require_once __DIR__ . '/Controllers/ImportController.php';
-require_once __DIR__ . '/Controllers/ExportController.php';
-require_once __DIR__ . '/Controllers/AuthController.php';
 
 function db(): PDO
 {
