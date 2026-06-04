@@ -1,56 +1,55 @@
 # CaT - Camping Info Web Tool
 
-Aplicatie Web pentru rezervarea si gestionarea locurilor de camping.
+CaT este o aplicatie Web pentru rezervarea, administrarea si compararea locurilor de camping. Proiectul a fost realizat pentru disciplina Tehnologii Web si respecta cerinta de a construi o aplicatie modulara, bazata pe servicii Web, fara framework-uri front-end sau back-end.
 
-Proiectul este organizat in arhitectura **MVC simpla**, fara framework.
+Aplicatia permite utilizatorilor sa caute campinguri, sa vada detalii, sa faca rezervari, sa lase recenzii si sa publice mesaje in comunitate, inclusiv cu fisiere multimedia. Administratorii pot gestiona campingurile, utilizatorii, rezervarile, importul/exportul de date si statisticile platformei.
 
-## Structura MVC
+## Functionalitati principale
 
-- `app/Models/` - modelele, adica partea care lucreaza cu baza de date SQLite.
-- `app/Controllers/` - controllerele, adica partea care primeste cereri si intoarce raspunsuri.
-- `app/Views/templates/` - template-uri comune pentru header si footer.
-- `app/Views/pages/` - paginile separate ale interfetei.
-- `index.php` - punctul de intrare pentru interfata.
-- `api/*.php` - endpoint-uri mici care apeleaza controllerele.
-
-## Functionalitati
-
-- Catalog campinguri.
-- Pagina individuala pentru camping.
-- Rezervari.
-- Recenzii si mesaje cu upload foto/audio/video.
-- Harta OpenStreetMap prin Leaflet.
+- Catalog de campinguri cu filtrare si cautare.
+- Pagina individuala pentru fiecare camping.
+- Rezervari cu validare pentru perioade, capacitate si suprapuneri.
+- Recenzii si comentarii din partea utilizatorilor.
+- Mesaje in comunitate, inclusiv cu upload foto, audio si video.
+- Harta interactiva folosind OpenStreetMap prin Leaflet.
+- Comparare intre mai multe campinguri.
 - Modul admin pentru campinguri, rezervari, utilizatori si statistici.
-- Import/export CSV si JSON.
-- Export statistici SVG si raport PDF simplu.
-- Login demo local pentru membru si admin.
+- Import si export de date in format CSV si JSON.
+- Export de statistici in SVG si raport PDF.
+- Feed RSS pentru noutati: campinguri, recenzii si mesaje recente.
+- Autentificare locala cu email si parola.
+- Autentificare prin GitHub OAuth.
+- Autorizare pe roluri: membru si administrator.
+- Utilizatori activi sau blocati.
+- Interfata responsive pentru desktop si mobil.
 
-## Tehnologii
+## Tehnologii folosite
 
 - PHP fara framework.
-- SQLite.
+- SQLite pentru stocarea datelor.
 - HTML, CSS si JavaScript vanilla.
 - Ajax prin `fetch()`.
-- OpenStreetMap/Leaflet pentru harta.
+- OpenStreetMap + Leaflet pentru harta.
+- GitHub OAuth pentru autentificare externa.
+- Stylelint pentru validarea CSS.
+- W3C Validator pentru verificarea HTML.
 
-## Pornire
-
-```powershell
-cd "C:\Users\Kapa\Desktop\WEB\WEB\Proiect"
-& "C:\xampp\php\php.exe" -S 127.0.0.1:8000
-```
-
-Deschide:
+## Structura proiectului
 
 ```text
-http://127.0.0.1:8000
-```
+app/
+  Controllers/       controllerele aplicatiei
+  Core/              clase de baza, precum Router
+  Models/            modele pentru lucrul cu baza de date
+  Views/
+    pages/           paginile principale ale interfetei
+    templates/       header si footer
 
-## Login
-
-Pentru testare:
-
-- `Demo membru`
-- `Demo admin`
-
-Butoanele GitHub/Google/OpenStreetMap folosesc login demo local, ca proiectul sa ramana usor de rulat si explicat.
+api/                 endpoint-uri Web/API
+assets/
+  css/               stilurile aplicatiei
+  js/                codul JavaScript
+auth/                fisiere pentru autentificare OAuth
+config/              configurari locale
+storage/             baza de date SQLite si fisiere uploadate
+index.php            punctul principal de intrare in aplicatie
