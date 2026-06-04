@@ -3,12 +3,12 @@
     <div class="section-head">
       <div>
         <span class="eyebrow">Mesaje si impresii</span>
-        <h2>Comunitatea CaT</h2>
+        <h1>Comunitatea CaT</h1>
       </div>
     </div>
     <div class="grid-2">
       <section class="panel">
-        <h3>Feed recent</h3>
+        <h2>Feed recent</h2>
         <div id="messageFeed" class="feed-list"></div>
       </section>
 

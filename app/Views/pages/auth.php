@@ -3,7 +3,7 @@
     <div class="section-head">
       <div>
         <span class="eyebrow">Contul tau</span>
-        <h2>Login si register</h2>
+        <h1>Login si register</h1>
         <p>Intra cu email si parola sau foloseste GitHub OAuth.</p>
       </div>
     </div>
@@ -12,7 +12,7 @@
 
     <div class="auth-box">
       <div class="auth-card">
-        <h3>Login</h3>
+        <h2>Login</h2>
         <form id="loginForm" class="form-grid">
           <div class="field wide">
             <label>Email</label>
@@ -29,7 +29,7 @@
       </div>
 
       <div class="auth-card">
-        <h3>Register</h3>
+        <h2>Register</h2>
         <form id="registerForm" class="form-grid">
           <div class="field wide">
             <label>Nume</label>
@@ -56,7 +56,7 @@
       </div>
 
       <div class="auth-card">
-        <h3>OAuth</h3>
+        <h2>OAuth</h2>
         <p class="muted">Autentificare externa prin GitHub OAuth.</p>
 
         <div class="oauth-options">

@@ -3,12 +3,12 @@
     <div class="section-head">
       <div>
         <span class="eyebrow">Administrare</span>
-        <h2>Dashboard admin</h2>
+        <h1>Dashboard admin</h1>
       </div>
     </div>
 
     <div class="admin-locked panel" id="adminLocked">
-      <h3>Acces rezervat administratorilor</h3>
+      <h2>Acces rezervat administratorilor</h2>
       <p class="muted">Intra folosind un cont de administrator pentru a vedea aceasta sectiune.</p>
       <a class="btn btn-primary" href="index.php?page=auth">Autentificare</a>
     </div>

@@ -3,3 +3,4 @@
 /storage/uploads/*
 !/storage/uploads/.gitkeep
 config/oauth.php
+node_modules/
