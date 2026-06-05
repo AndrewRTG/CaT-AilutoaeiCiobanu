@@ -11,21 +11,32 @@
     <div class="auth-error" id="oauthError"></div>
 
     <div class="auth-box">
-      <div class="auth-card">
-        <h2>Login</h2>
-        <form id="loginForm" class="form-grid">
-          <div class="field wide">
-            <label>Email</label>
-            <input type="email" name="email" required>
-          </div>
+      <div class="auth-column">
+        <div class="auth-card">
+          <h2>Login</h2>
+          <form id="loginForm" class="form-grid">
+            <div class="field wide">
+              <label>Email</label>
+              <input type="email" name="email" required>
+            </div>
 
-          <div class="field wide">
-            <label>Parola</label>
-            <input type="password" name="password" required>
-          </div>
+            <div class="field wide">
+              <label>Parola</label>
+              <input type="password" name="password" required>
+            </div>
 
-          <button class="btn btn-primary wide" type="submit">Intra in cont</button>
-        </form>
+            <button class="btn btn-primary wide" type="submit">Intra in cont</button>
+          </form>
+        </div>
+
+        <div class="auth-card">
+          <h2>OAuth</h2>
+          <p class="muted">Autentificare externa prin GitHub OAuth.</p>
+
+          <div class="oauth-options">
+            <a class="btn oauth-btn" href="auth/github.php">Continua cu GitHub</a>
+          </div>
+        </div>
       </div>
 
       <div class="auth-card">
@@ -53,15 +64,6 @@
 
           <button class="btn btn-primary wide" type="submit">Creeaza cont</button>
         </form>
-      </div>
-
-      <div class="auth-card">
-        <h2>OAuth</h2>
-        <p class="muted">Autentificare externa prin GitHub OAuth.</p>
-
-        <div class="oauth-options">
-          <a class="btn oauth-btn" href="auth/github.php">Continua cu GitHub</a>
-        </div>
       </div>
     </div>
   </div>

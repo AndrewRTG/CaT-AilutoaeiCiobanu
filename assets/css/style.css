@@ -24,6 +24,8 @@ html {
 }
 
 body {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   margin: 0;
   color: var(--text);
@@ -34,6 +36,10 @@ body {
     linear-gradient(135deg, #f9fbf4 0%, #eef6e8 48%, #f7f0e1 100%);
   background-attachment: fixed;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+main {
+  flex: 1;
 }
 
 body::before {
@@ -68,6 +74,18 @@ button {
 .shell {
   width: min(var(--max), calc(100% - 32px));
   margin: 0 auto;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .topbar {
@@ -259,15 +277,20 @@ p {
 h1 {
   max-width: 860px;
   margin: 16px 0 22px;
+  font-size: clamp(34px, 3.5vw, 48px);
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+}
+
+.home-layout h1 {
   font-size: clamp(38px, 4.4vw, 60px);
   line-height: 1.02;
-  letter-spacing: 0.01em;
 }
 
 h2 {
   margin-bottom: 0;
-  font-size: clamp(30px, 4vw, 44px);
-  line-height: 1.05;
+  font-size: clamp(26px, 3vw, 38px);
+  line-height: 1.1;
   letter-spacing: 0;
 }
 
@@ -784,6 +807,20 @@ h3 {
 
 .auth-box {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.auth-column {
+  display: grid;
+  gap: 18px;
+}
+
+.auth-box > .auth-card {
+  height: 100%;
+}
+
+.auth-card h2 {
+  font-size: 30px;
 }
 
 .oauth-options {
@@ -898,6 +935,10 @@ h3 {
   }
 
   h1 {
+    font-size: 34px;
+  }
+
+  .home-layout h1 {
     font-size: 40px;
   }
 
