@@ -25,6 +25,7 @@ class DatabaseModel
         self::$db->exec('PRAGMA busy_timeout = 5000');
 
         self::createTables();
+        //self::seedData();
 
         return self::$db;
     }
