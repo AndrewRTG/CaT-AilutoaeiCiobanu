@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CaT - Raport Scholarly HTML</title>
+  <style>
+    :root {
+      --text: #1f2d1d;
+      --muted: #5f6f5a;
+      --line: #d9e4d1;
+      --soft: #f4f8ef;
+      --green: #2f6b3f;
+      --green-dark: #1f4f31;
+      --orange: #d9853b;
+      --white: #fff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: linear-gradient(135deg, #f8fbf3 0%, #eef6e8 52%, #fbf5e9 100%);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+    }
+
+    header,
+    main,
+    footer {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 56px 0 28px;
+    }
+
+    main {
+      display: grid;
+      gap: 20px;
+      padding-bottom: 48px;
+    }
+
+    article,
+    nav,
+    section,
+    footer {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgb(255 255 255 / 84%);
+      box-shadow: 0 18px 45px rgb(47 107 63 / 8%);
+      padding: 24px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.2;
+      color: var(--green-dark);
+    }
+
+    h1 {
+      max-width: 850px;
+      margin: 0 0 14px;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+    }
+
+    h2 {
+      margin-top: 0;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 8px;
+      font-size: 1.65rem;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      font-size: 1.15rem;
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    a {
+      color: var(--green-dark);
+      font-weight: 700;
+    }
+
+    code,
+    pre {
+      border-radius: 10px;
+      background: #eef5e8;
+      color: #183b24;
+    }
+
+    code {
+      padding: 2px 5px;
+    }
+
+    pre {
+      overflow-x: auto;
+      padding: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #e6f0dd;
+      color: var(--green-dark);
+    }
+
+    ul,
+    ol {
+      padding-left: 22px;
+    }
+
+    li {
+      margin: 4px 0;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 820px;
+      margin-top: 18px;
+    }
+
+    .meta div,
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: var(--soft);
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .abstract {
+      font-size: 1.05rem;
+    }
+
+    .ok {
+      color: var(--green-dark);
+      font-weight: 700;
+    }
+
+    .diagram {
+      overflow-x: auto;
+      margin: 16px 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfdf8;
+    }
+
+    .diagram svg {
+      min-width: 820px;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .box {
+      fill: #fff;
+      stroke: #2f6b3f;
+      stroke-width: 2;
+      rx: 12;
+    }
+
+    .external {
+      fill: #fff7eb;
+      stroke: #d9853b;
+      stroke-width: 2;
+      rx: 12;
+    }
+
+    .db {
+      fill: #eef5e8;
+      stroke: #1f4f31;
+      stroke-width: 2;
+      rx: 12;
+    }
+
+    .arrow {
+      fill: none;
+      stroke: #65705f;
+      stroke-width: 2;
+    }
+
+    .system-boundary {
+      fill: none;
+      stroke: #9aae91;
+      stroke-dasharray: 8 6;
+      stroke-width: 2;
+      rx: 16;
+    }
+
+    .diagram-label {
+      fill: #65705f;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .caption {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    footer {
+      margin-bottom: 32px;
+      color: var(--muted);
+    }
+
+    @media (width <= 760px) {
+      article,
+      nav,
+      section,
+      footer {
+        padding: 18px;
+      }
+
+      .meta {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="pill">Raport Scholarly HTML</p>
+    <h1>CaT - Camping Info Web Tool</h1>
+    <p class="abstract">
+      CaT este o aplicatie Web modulara pentru rezervarea, administrarea si compararea locurilor de camping. Aplicatia este dezvoltata in PHP, fara framework-uri, foloseste SQLite pentru persistenta datelor si expune functionalitatile principale prin servicii Web consumate asincron cu Ajax/fetch.
+    </p>
+    <div class="meta" aria-label="metadate proiect">
+      <div><strong>Disciplina:</strong> Tehnologii Web</div>
+      <div><strong>Echipa:</strong> Ailutoaei - Ciobanu</div>
+      <div><strong>Repository:</strong> AndrewRTG/CaT-AilutoaeiCiobanu</div>
+      <div><strong>Versiune raport:</strong> 1.0</div>
+    </div>
+  </header>
+
+  <main>
+    <nav aria-labelledby="toc-title">
+      <h2 id="toc-title">Cuprins</h2>
+      <ol>
+        <li><a href="#introducere">Introducere</a></li>
+        <li><a href="#cerinte">Cerinte si functionalitati</a></li>
+        <li><a href="#utilizatori">Tipuri de utilizatori</a></li>
+        <li><a href="#arhitectura">Arhitectura aplicatiei</a></li>
+        <li><a href="#date">Modelarea datelor</a></li>
+        <li><a href="#servicii">Servicii Web si Ajax</a></li>
+        <li><a href="#auth">Autentificare, OAuth si autorizare</a></li>
+        <li><a href="#ui">Interfata si design responsive</a></li>
+        <li><a href="#securitate">Securitate</a></li>
+        <li><a href="#validare">Validare si testare</a></li>
+        <li><a href="#concluzii">Concluzii si dezvoltari viitoare</a></li>
+        <li><a href="#bibliografie">Bibliografie</a></li>
+      </ol>
+    </nav>
+
+    <article id="introducere">
+      <h2>1. Introducere</h2>
+      <p>
+        Scopul proiectului CaT este realizarea unui instrument Web care permite rezervarea si gestionarea locurilor de camping. Aplicatia pune la dispozitie un catalog public de campinguri, pagini individuale pentru fiecare locatie, rezervari, recenzii, mesaje in comunitate si o harta interactiva bazata pe OpenStreetMap.
+      </p>
+      <p>
+        Solutia este orientata spre partea de server, folosind PHP si SQLite. Clientul este realizat cu HTML, CSS si JavaScript vanilla. Nu sunt folosite framework-uri Web pe partea de server sau client. Aplicatia este structurata intr-o arhitectura MVC simpla si comunica prin endpoint-uri API asincrone.
+      </p>
+      <div class="pill-list">
+        <span class="pill">PHP fara framework</span>
+        <span class="pill">SQLite</span>
+        <span class="pill">HTML/CSS/JS vanilla</span>
+        <span class="pill">Ajax prin fetch()</span>
+        <span class="pill">OpenStreetMap</span>
+        <span class="pill">GitHub OAuth</span>
+      </div>
+    </article>
+
+    <section id="cerinte">
+      <h2>2. Cerinte si functionalitati</h2>
+      <h3>2.1 Cerinte functionale</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Cerinta</th>
+            <th>Implementare in CaT</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Catalog de campinguri</td><td>Lista de campinguri cu nume, zona, rating, pret, capacitate, facilitati si imagine.</td><td class="ok">Implementat</td></tr>
+          <tr><td>Pagina proprie pentru fiecare camping</td><td>Pagina de detalii generata pe baza id-ului campingului.</td><td class="ok">Implementat</td></tr>
+          <tr><td>Rezervari</td><td>Formular de rezervare cu validare pentru perioada, numar de persoane, capacitate si suprapuneri.</td><td class="ok">Implementat</td></tr>
+          <tr><td>Recenzii si comentarii</td><td>Utilizatorii autentificati pot adauga recenzii si impresii asociate campingurilor.</td><td class="ok">Implementat</td></tr>
+          <tr><td>Mesaje multimedia</td><td>Upload pentru fotografii, audio si video in zona comunitatii si in recenzii.</td><td class="ok">Implementat</td></tr>
+          <tr><td>Harta interactiva</td><td>Harta OpenStreetMap prin Leaflet, cu markere pentru campinguri.</td><td class="ok">Implementat</td></tr>
+          <tr><td>Cautare si comparare</td><td>Cautare dupa text/zona, sortare si comparare intre campinguri selectate.</td><td class="ok">Implementat</td></tr>
+          <tr><td>Administrare</td><td>Panou admin pentru campinguri, rezervari, utilizatori, roluri, import/export si statistici.</td><td class="ok">Implementat</td></tr>
+          <tr><td>Statistici SVG/PDF</td><td>Export de grafice SVG si raport administrativ PDF.</td><td class="ok">Implementat</td></tr>
+          <tr><td>OAuth</td><td>Autentificare prin GitHub OAuth cu state anti-CSRF.</td><td class="ok">Implementat</td></tr>
+        </tbody>
+      </table>
+
+      <h3>2.2 Cerinte non-functionale</h3>
+      <ul>
+        <li>Aplicatia foloseste PHP fara framework si o arhitectura MVC simpla.</li>
+        <li>Clientul foloseste HTML, CSS si JavaScript vanilla.</li>
+        <li>Comunicarea cu serverul este realizata prin servicii Web si Ajax.</li>
+        <li>Datele sunt stocate in SQLite si interogate prin SQL.</li>
+        <li>Interfata este responsive si se adapteaza pentru desktop si mobil.</li>
+        <li>Aplicatia foloseste masuri de prevenire pentru SQL injection si XSS.</li>
+        <li>Importul si exportul folosesc formate deschise: CSV si JSON.</li>
+      </ul>
+    </section>
+
+    <section id="utilizatori">
+      <h2>3. Tipuri de utilizatori</h2>
+      <table>
+        <thead>
+          <tr><th>Actor</th><th>Descriere</th><th>Functionalitati principale</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Vizitator</td><td>Utilizator neautentificat.</td><td>Vizualizare campinguri, cautare, harta si comparare.</td></tr>
+          <tr><td>Membru</td><td>Utilizator autentificat local sau prin OAuth.</td><td>Rezervari, recenzii, mesaje si continut multimedia.</td></tr>
+          <tr><td>Administrator</td><td>Utilizator cu acces complet.</td><td>Management campinguri, rezervari, utilizatori, roluri, statistici, import/export.</td></tr>
+          <tr><td>Rol custom</td><td>Rol creat de administrator si asociat unui set de permisiuni.</td><td>Acces partial la module administrative, in functie de permisiunile alese.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="arhitectura">
+      <h2>4. Arhitectura aplicatiei</h2>
+      <p>
+        CaT este organizata in arhitectura MVC. Directorul <code>app/Models</code> contine modelele pentru interactiunea cu baza de date, <code>app/Controllers</code> contine controllerele care proceseaza cererile API, iar <code>app/Views</code> contine paginile si template-urile de prezentare. Punctul principal de intrare este <code>index.php</code>, iar endpoint-urile Web se afla in directorul <code>api/</code>.
+      </p>
+      <p>
+        Diagramele urmatoare descriu sistemul pe trei niveluri C4: contextul general, containerele executabile si componentele principale ale aplicatiei PHP.
+      </p>
+
+      <h3>4.1 Diagrama C4 - Context</h3>
+      <figure class="diagram">
+        <svg viewBox="0 0 980 500" role="img" aria-labelledby="c4context-title c4context-desc">
+          <title id="c4context-title">Diagrama C4 context</title>
+          <desc id="c4context-desc">Vizitatorii, membrii si administratorii folosesc CaT. Aplicatia comunica cu GitHub OAuth si OpenStreetMap si publica un flux RSS.</desc>
+          <defs>
+            <marker id="arrow-context" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#65705f"></path>
+            </marker>
+          </defs>
+          <rect class="external" x="35" y="80" width="210" height="95"></rect>
+          <text x="140" y="116" text-anchor="middle" font-size="16" font-weight="700">Vizitator / Membru</text>
+          <text x="140" y="141" text-anchor="middle" font-size="13">consulta, rezerva, publica</text>
+
+          <rect class="external" x="35" y="315" width="210" height="95"></rect>
+          <text x="140" y="351" text-anchor="middle" font-size="16" font-weight="700">Administrator</text>
+          <text x="140" y="376" text-anchor="middle" font-size="13">administreaza si analizeaza</text>
+
+          <rect class="box" x="355" y="183" width="270" height="125"></rect>
+          <text x="490" y="226" text-anchor="middle" font-size="20" font-weight="700">CaT</text>
+          <text x="490" y="252" text-anchor="middle" font-size="14">Camping Info Web Tool</text>
+          <text x="490" y="276" text-anchor="middle" font-size="13">rezervari si gestiune campinguri</text>
+
+          <rect class="external" x="755" y="55" width="190" height="80"></rect>
+          <text x="850" y="87" text-anchor="middle" font-size="15" font-weight="700">GitHub OAuth</text>
+          <text x="850" y="111" text-anchor="middle" font-size="12">identitate externa</text>
+
+          <rect class="external" x="755" y="205" width="190" height="80"></rect>
+          <text x="850" y="237" text-anchor="middle" font-size="15" font-weight="700">OpenStreetMap</text>
+          <text x="850" y="261" text-anchor="middle" font-size="12">date cartografice</text>
+
+          <rect class="external" x="755" y="355" width="190" height="80"></rect>
+          <text x="850" y="387" text-anchor="middle" font-size="15" font-weight="700">Cititor RSS</text>
+          <text x="850" y="411" text-anchor="middle" font-size="12">consuma noutatile publice</text>
+
+          <line class="arrow" x1="245" y1="128" x2="355" y2="212" marker-end="url(#arrow-context)"></line>
+          <line class="arrow" x1="245" y1="362" x2="355" y2="278" marker-end="url(#arrow-context)"></line>
+          <line class="arrow" x1="625" y1="215" x2="755" y2="105" marker-end="url(#arrow-context)"></line>
+          <line class="arrow" x1="625" y1="245" x2="755" y2="245" marker-end="url(#arrow-context)"></line>
+          <line class="arrow" x1="755" y1="385" x2="625" y2="278" marker-end="url(#arrow-context)"></line>
+
+          <text class="diagram-label" x="293" y="151" text-anchor="middle">HTTPS</text>
+          <text class="diagram-label" x="293" y="349" text-anchor="middle">HTTPS</text>
+          <text class="diagram-label" x="690" y="145" text-anchor="middle">OAuth 2.0</text>
+          <text class="diagram-label" x="690" y="233" text-anchor="middle">tile-uri</text>
+          <text class="diagram-label" x="690" y="350" text-anchor="middle">RSS</text>
+        </svg>
+        <figcaption class="caption">Figura 1. Diagrama C4 de context pentru aplicatia CaT.</figcaption>
+      </figure>
+
+      <h3>4.2 Diagrama C4 - Containere</h3>
+      <figure class="diagram">
+        <svg viewBox="0 0 1040 620" role="img" aria-labelledby="c4container-title c4container-desc">
+          <title id="c4container-title">Diagrama C4 containere</title>
+          <desc id="c4container-desc">Browserul incarca interfata si apeleaza aplicatia PHP. Aplicatia foloseste baza SQLite, stocarea de fisiere si GitHub OAuth. Browserul incarca harta OpenStreetMap.</desc>
+          <defs>
+            <marker id="arrow-container" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#65705f"></path>
+            </marker>
+          </defs>
+
+          <rect class="external" x="25" y="245" width="175" height="100"></rect>
+          <text x="112" y="282" text-anchor="middle" font-size="16" font-weight="700">Utilizator</text>
+          <text x="112" y="307" text-anchor="middle" font-size="13">foloseste aplicatia</text>
+
+          <rect class="system-boundary" x="235" y="35" width="590" height="540"></rect>
+          <text class="diagram-label" x="255" y="62">Sistem CaT</text>
+
+          <rect class="box" x="285" y="105" width="220" height="115"></rect>
+          <text x="395" y="143" text-anchor="middle" font-size="16" font-weight="700">Client Web</text>
+          <text x="395" y="169" text-anchor="middle" font-size="13">HTML, CSS, JavaScript</text>
+          <text x="395" y="192" text-anchor="middle" font-size="12">ruleaza in browser</text>
+
+          <rect class="box" x="555" y="105" width="220" height="115"></rect>
+          <text x="665" y="143" text-anchor="middle" font-size="16" font-weight="700">Aplicatie Web PHP</text>
+          <text x="665" y="169" text-anchor="middle" font-size="13">MVC, API JSON, token-uri</text>
+          <text x="665" y="192" text-anchor="middle" font-size="12">ruleaza in Apache / PHP</text>
+
+          <rect class="db" x="285" y="405" width="220" height="105"></rect>
+          <text x="395" y="443" text-anchor="middle" font-size="16" font-weight="700">Baza de date</text>
+          <text x="395" y="469" text-anchor="middle" font-size="13">SQLite / cat.sqlite</text>
+          <text x="395" y="492" text-anchor="middle" font-size="12">date si token-uri autentificare</text>
+
+          <rect class="db" x="555" y="405" width="220" height="105"></rect>
+          <text x="665" y="443" text-anchor="middle" font-size="16" font-weight="700">Storage fisiere</text>
+          <text x="665" y="469" text-anchor="middle" font-size="13">storage/uploads</text>
+          <text x="665" y="492" text-anchor="middle" font-size="12">imagini, audio si video</text>
+
+          <rect class="external" x="860" y="105" width="155" height="90"></rect>
+          <text x="937" y="139" text-anchor="middle" font-size="15" font-weight="700">GitHub OAuth</text>
+          <text x="937" y="164" text-anchor="middle" font-size="12">autentificare</text>
+
+          <rect class="external" x="860" y="375" width="155" height="90"></rect>
+          <text x="937" y="409" text-anchor="middle" font-size="15" font-weight="700">OpenStreetMap</text>
+          <text x="937" y="434" text-anchor="middle" font-size="12">harta si tile-uri</text>
+
+          <line class="arrow" x1="200" y1="295" x2="285" y2="180" marker-end="url(#arrow-container)"></line>
+          <line class="arrow" x1="505" y1="162" x2="555" y2="162" marker-end="url(#arrow-container)"></line>
+          <line class="arrow" x1="625" y1="220" x2="440" y2="405" marker-end="url(#arrow-container)"></line>
+          <line class="arrow" x1="690" y1="220" x2="675" y2="405" marker-end="url(#arrow-container)"></line>
+          <line class="arrow" x1="775" y1="145" x2="860" y2="145" marker-end="url(#arrow-container)"></line>
+          <line class="arrow" x1="505" y1="195" x2="860" y2="405" marker-end="url(#arrow-container)"></line>
+
+          <text class="diagram-label" x="239" y="224" text-anchor="middle">HTTPS</text>
+          <text class="diagram-label" x="530" y="150" text-anchor="middle">fetch / JSON</text>
+          <text class="diagram-label" x="500" y="315" text-anchor="middle">PDO / SQL</text>
+          <text class="diagram-label" x="700" y="315" text-anchor="middle">fisiere</text>
+        </svg>
+        <figcaption class="caption">Figura 2. Diagrama C4 de containere si principalele protocoale folosite.</figcaption>
+      </figure>
+
+      <h3>4.3 Diagrama C4 - Componente</h3>
+      <figure class="diagram">
+        <svg viewBox="0 0 1240 980" role="img" aria-labelledby="c4component-title c4component-desc">
+          <title id="c4component-title">Diagrama C4 componente</title>
+          <desc id="c4component-desc">Componentele aplicatiei PHP sunt organizate in zona de prezentare, servicii API, autentificare si autorizare, logica de domeniu, raportare, upload, modele si acces PDO la SQLite.</desc>
+          <defs>
+            <marker id="arrow-component" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#65705f"></path>
+            </marker>
+          </defs>
+
+          <rect class="external" x="20" y="115" width="170" height="105"></rect>
+          <text x="105" y="151" text-anchor="middle" font-size="16" font-weight="700">Client Web</text>
+          <text x="105" y="177" text-anchor="middle" font-size="13">HTML si JavaScript</text>
+          <text x="105" y="199" text-anchor="middle" font-size="12">navigare, fetch, formulare</text>
+
+          <rect class="system-boundary" x="220" y="30" width="800" height="900"></rect>
+          <text class="diagram-label" x="242" y="58">Container: Aplicatie Web PHP</text>
+
+          <rect class="box" x="270" y="90" width="280" height="115"></rect>
+          <text x="410" y="122" text-anchor="middle" font-size="16" font-weight="700">Router si Views</text>
+          <text x="410" y="147" text-anchor="middle" font-size="13">index.php, Router.php</text>
+          <text x="410" y="169" text-anchor="middle" font-size="12">Views/pages si Views/templates</text>
+          <text x="410" y="189" text-anchor="middle" font-size="12">selecteaza si randeaza pagina HTML</text>
+
+          <rect class="box" x="650" y="90" width="280" height="115"></rect>
+          <text x="790" y="122" text-anchor="middle" font-size="16" font-weight="700">Endpoint-uri API</text>
+          <text x="790" y="147" text-anchor="middle" font-size="13">api/*.php si api/_bootstrap.php</text>
+          <text x="790" y="169" text-anchor="middle" font-size="12">primeste Ajax, JSON si form-data</text>
+          <text x="790" y="189" text-anchor="middle" font-size="12">apeleaza controllerul corespunzator</text>
+
+          <rect class="box" x="250" y="280" width="220" height="125"></rect>
+          <text x="360" y="312" text-anchor="middle" font-size="16" font-weight="700">Autentificare</text>
+          <text x="360" y="337" text-anchor="middle" font-size="12">AuthController</text>
+          <text x="360" y="357" text-anchor="middle" font-size="12">AuthTokenModel, auth/*.php</text>
+          <text x="360" y="377" text-anchor="middle" font-size="12">login local, OAuth, Bearer token</text>
+
+          <rect class="box" x="510" y="280" width="220" height="125"></rect>
+          <text x="620" y="312" text-anchor="middle" font-size="16" font-weight="700">Autorizare</text>
+          <text x="620" y="337" text-anchor="middle" font-size="12">RoleController si RoleModel</text>
+          <text x="620" y="357" text-anchor="middle" font-size="12">require_login()</text>
+          <text x="620" y="377" text-anchor="middle" font-size="12">require_permission() si roluri</text>
+
+          <rect class="box" x="770" y="280" width="220" height="125"></rect>
+          <text x="880" y="312" text-anchor="middle" font-size="16" font-weight="700">Controllere domeniu</text>
+          <text x="880" y="337" text-anchor="middle" font-size="12">Camping si Reservation</text>
+          <text x="880" y="357" text-anchor="middle" font-size="12">Review si Message</text>
+          <text x="880" y="377" text-anchor="middle" font-size="12">AdminUser si Session</text>
+
+          <rect class="box" x="250" y="485" width="300" height="130"></rect>
+          <text x="400" y="518" text-anchor="middle" font-size="16" font-weight="700">Statistici, import si export</text>
+          <text x="400" y="543" text-anchor="middle" font-size="12">StatsController si StatsModel</text>
+          <text x="400" y="563" text-anchor="middle" font-size="12">ImportController si ExportController</text>
+          <text x="400" y="583" text-anchor="middle" font-size="12">CSV, JSON, SVG si PDF</text>
+
+          <rect class="box" x="650" y="485" width="300" height="130"></rect>
+          <text x="800" y="518" text-anchor="middle" font-size="16" font-weight="700">Upload multimedia</text>
+          <text x="800" y="543" text-anchor="middle" font-size="12">save_upload()</text>
+          <text x="800" y="563" text-anchor="middle" font-size="12">save_image_upload()</text>
+          <text x="800" y="583" text-anchor="middle" font-size="12">valideaza tipul, marimea si numele</text>
+
+          <rect class="box" x="250" y="700" width="300" height="135"></rect>
+          <text x="400" y="733" text-anchor="middle" font-size="16" font-weight="700">Modele / Data Access</text>
+          <text x="400" y="758" text-anchor="middle" font-size="12">Camping, Reservation, Review</text>
+          <text x="400" y="778" text-anchor="middle" font-size="12">Message, User, Role, Stats</text>
+          <text x="400" y="798" text-anchor="middle" font-size="12">reguli si interogari parametrizate</text>
+
+          <rect class="box" x="650" y="700" width="300" height="135"></rect>
+          <text x="800" y="733" text-anchor="middle" font-size="16" font-weight="700">Conexiune baza de date</text>
+          <text x="800" y="758" text-anchor="middle" font-size="12">DatabaseModel si PDO</text>
+          <text x="800" y="778" text-anchor="middle" font-size="12">deschide storage/cat.sqlite</text>
+          <text x="800" y="798" text-anchor="middle" font-size="12">creeaza schema si activeaza FK</text>
+
+          <rect class="external" x="1060" y="295" width="160" height="90"></rect>
+          <text x="1140" y="328" text-anchor="middle" font-size="15" font-weight="700">GitHub OAuth</text>
+          <text x="1140" y="353" text-anchor="middle" font-size="12">login si profil extern</text>
+
+          <rect class="db" x="1060" y="505" width="160" height="90"></rect>
+          <text x="1140" y="538" text-anchor="middle" font-size="15" font-weight="700">storage/uploads</text>
+          <text x="1140" y="563" text-anchor="middle" font-size="12">foto, audio si video</text>
+
+          <rect class="db" x="1060" y="720" width="160" height="90"></rect>
+          <text x="1140" y="753" text-anchor="middle" font-size="15" font-weight="700">SQLite</text>
+          <text x="1140" y="778" text-anchor="middle" font-size="12">date si token-uri</text>
+
+          <line class="arrow" x1="190" y1="145" x2="270" y2="145" marker-end="url(#arrow-component)"></line>
+          <path class="arrow" d="M 190 190 L 225 190 L 225 235 L 790 235 L 790 205" marker-end="url(#arrow-component)"></path>
+
+          <path class="arrow" d="M 710 205 L 710 245 L 360 245 L 360 280" marker-end="url(#arrow-component)"></path>
+          <line class="arrow" x1="790" y1="205" x2="620" y2="280" marker-end="url(#arrow-component)"></line>
+          <line class="arrow" x1="850" y1="205" x2="880" y2="280" marker-end="url(#arrow-component)"></line>
+
+          <line class="arrow" x1="770" y1="342" x2="730" y2="342" marker-end="url(#arrow-component)"></line>
+          <path class="arrow" d="M 850 405 L 850 650 L 470 650 L 470 700" marker-end="url(#arrow-component)"></path>
+          <line class="arrow" x1="880" y1="405" x2="830" y2="485" marker-end="url(#arrow-component)"></line>
+
+          <path class="arrow" d="M 400 485 L 400 450 L 620 450 L 620 405" marker-end="url(#arrow-component)"></path>
+          <line class="arrow" x1="400" y1="615" x2="400" y2="700" marker-end="url(#arrow-component)"></line>
+          <path class="arrow" d="M 360 405 L 360 670 L 330 670 L 330 700" marker-end="url(#arrow-component)"></path>
+          <line class="arrow" x1="620" y1="405" x2="500" y2="700" marker-end="url(#arrow-component)"></line>
+
+          <path class="arrow" d="M 470 320 L 1035 320 L 1035 340 L 1060 340" marker-end="url(#arrow-component)"></path>
+          <line class="arrow" x1="950" y1="550" x2="1060" y2="550" marker-end="url(#arrow-component)"></line>
+          <line class="arrow" x1="550" y1="767" x2="650" y2="767" marker-end="url(#arrow-component)"></line>
+          <line class="arrow" x1="950" y1="767" x2="1060" y2="767" marker-end="url(#arrow-component)"></line>
+
+          <text class="diagram-label" x="230" y="132" text-anchor="middle">HTTP</text>
+          <text class="diagram-label" x="490" y="224" text-anchor="middle">Ajax / JSON</text>
+          <text class="diagram-label" x="1025" y="307" text-anchor="middle">OAuth 2.0</text>
+          <text class="diagram-label" x="1005" y="538" text-anchor="middle">scriere</text>
+          <text class="diagram-label" x="600" y="754" text-anchor="middle">apeluri PDO</text>
+          <text class="diagram-label" x="1005" y="754" text-anchor="middle">SQL</text>
+        </svg>
+        <figcaption class="caption">Figura 3. Diagrama C4 detaliata a componentelor din containerul Aplicatie Web PHP, realizata dupa clasele existente in proiect.</figcaption>
+      </figure>
+    </section>
+
+    <section id="date">
+      <h2>5. Modelarea datelor</h2>
+      <p>
+        Datele sunt persistate intr-o baza SQLite. Tabelele sunt create automat la conectarea aplicatiei, iar modelele PHP gestioneaza interogarile si validarile.
+      </p>
+      <table>
+        <thead>
+          <tr><th>Tabela</th><th>Rol</th><th>Atribute importante</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>users</code></td><td>Utilizatori locali si OAuth.</td><td>provider, provider_id, name, email, password_hash, role, status.</td></tr>
+          <tr><td><code>roles</code></td><td>Roluri custom si permisiuni.</td><td>slug, name, permissions, is_system.</td></tr>
+          <tr><td><code>auth_tokens</code></td><td>Tokenuri interne pentru acces API.</td><td>user_id, token_hash, expires_at.</td></tr>
+          <tr><td><code>campings</code></td><td>Oferte de camping.</td><td>name, slug, zone, description, price_per_night, rating, latitude, longitude, capacity, facilities.</td></tr>
+          <tr><td><code>reservations</code></td><td>Rezervari facute de utilizatori.</td><td>user_id, camping_id, start_date, end_date, guests, status.</td></tr>
+          <tr><td><code>reviews</code></td><td>Recenzii pentru campinguri.</td><td>user_id, camping_id, rating, comment, media_type, media_path.</td></tr>
+          <tr><td><code>messages</code></td><td>Mesaje in comunitate.</td><td>user_id, camping_id, content, media_type, media_path.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="servicii">
+      <h2>6. Servicii Web si Ajax</h2>
+      <p>
+        Aplicatia este bazata pe servicii Web. Interfata trimite cereri asincrone catre fisierele din directorul <code>api/</code>, iar raspunsurile sunt de regula JSON.
+      </p>
+      <table>
+        <thead>
+          <tr><th>Endpoint</th><th>Rol</th><th>Metode</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>api/session.php</code></td><td>Returneaza utilizatorul curent.</td><td>GET</td></tr>
+          <tr><td><code>api/auth.php</code></td><td>Login/register local.</td><td>POST</td></tr>
+          <tr><td><code>api/campings.php</code></td><td>Listare, detalii, creare, editare si stergere campinguri.</td><td>GET, POST, PATCH, DELETE</td></tr>
+          <tr><td><code>api/reservations.php</code></td><td>Rezervari utilizator si administrare statusuri.</td><td>GET, POST, PATCH</td></tr>
+          <tr><td><code>api/reviews.php</code></td><td>Adaugare recenzii.</td><td>POST</td></tr>
+          <tr><td><code>api/messages.php</code></td><td>Mesaje in comunitate.</td><td>GET, POST</td></tr>
+          <tr><td><code>api/stats.php</code></td><td>Statistici pentru panoul admin.</td><td>GET</td></tr>
+          <tr><td><code>api/admin_users.php</code></td><td>Gestiune utilizatori.</td><td>GET, PATCH</td></tr>
+          <tr><td><code>api/roles.php</code></td><td>Roluri custom si permisiuni.</td><td>GET, POST, PATCH, DELETE</td></tr>
+          <tr><td><code>api/import.php</code></td><td>Import CSV/JSON.</td><td>POST</td></tr>
+          <tr><td><code>api/export.php</code></td><td>Export CSV/JSON/SVG/PDF.</td><td>GET</td></tr>
+          <tr><td><code>api/rss.php</code></td><td>Feed RSS public.</td><td>GET</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="auth">
+      <h2>7. Autentificare, OAuth si autorizare</h2>
+      <h3>7.1 Autentificare locala</h3>
+      <p>
+        Aplicatia permite crearea unui cont local cu nume, email si parola. Parolele sunt salvate folosind hashing, iar login-ul verifica parola prin mecanismele standard PHP pentru parole.
+      </p>
+      <h3>7.2 GitHub OAuth</h3>
+      <p>
+        Autentificarea OAuth foloseste GitHub. Fluxul incepe prin generarea unui <code>state</code> aleator, salvat in cookie <code>HttpOnly</code>. Dupa autentificarea pe GitHub, callback-ul verifica <code>state</code>, obtine access token-ul si datele utilizatorului, apoi creeaza sau actualizeaza utilizatorul local.
+      </p>
+      <h3>7.3 Bearer token intern</h3>
+      <p>
+        Dupa autentificare, aplicatia genereaza un token intern. Clientul il salveaza in <code>localStorage</code> si il trimite catre API-uri in headerul <code>Authorization: Bearer</code>.
+      </p>
+      <h3>7.4 RBAC - roluri si permisiuni</h3>
+      <p>
+        Sistemul de autorizare este bazat pe roluri si permisiuni. Rolul <code>admin</code> are acces complet. Rolurile custom pot primi permisiuni precum <code>manage_campings</code>, <code>manage_reservations</code>, <code>manage_users</code>, <code>view_stats</code>, <code>import_export</code> si <code>manage_roles</code>.
+      </p>
+    </section>
+
+    <section id="ui">
+      <h2>8. Interfata si design responsive</h2>
+      <p>
+        Interfata este construita cu HTML si CSS, fara framework-uri. Designul foloseste o tema vizuala inspirata de natura, cu nuante de verde, alb si bej. Layout-ul foloseste CSS Grid si Flexbox, iar pentru ecrane mici continutul se reorganizeaza pe o singura coloana.
+      </p>
+    </section>
+
+    <section id="securitate">
+      <h2>9. Securitate</h2>
+      <table>
+        <thead>
+          <tr><th>Risc</th><th>Masura aplicata</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>SQL Injection</td><td>Interogari parametrizate prin <code>prepare()</code> si <code>execute()</code>.</td></tr>
+          <tr><td>Cross Site Scripting</td><td>Escapare la afisare prin <code>htmlspecialchars()</code> si <code>escapeHtml()</code>.</td></tr>
+          <tr><td>Parole compromise</td><td>Parole salvate hash-uit si verificate prin functii dedicate.</td></tr>
+          <tr><td>Acces neautorizat</td><td>Token Bearer, roluri, permisiuni si functia <code>require_permission()</code>.</td></tr>
+          <tr><td>OAuth CSRF</td><td>Parametru <code>state</code> verificat la callback.</td></tr>
+          <tr><td>Upload periculos</td><td>Limitare extensii, tipuri acceptate si dimensiuni maxime.</td></tr>
+          <tr><td>Expunere secrete</td><td><code>config/oauth.php</code> este ignorat prin <code>.gitignore</code>.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="validare">
+      <h2>10. Validare si testare</h2>
+      <h3>10.1 Validare HTML si CSS</h3>
+      <p>
+        Paginile HTML generate au fost verificate cu W3C Validator. Fisierele CSS au fost verificate cu Stylelint. Proiectul include configuratie npm pentru rularea validarii CSS.
+      </p>
+      <pre><code>npm install
+npm run lint:css
+npm run lint:css:fix</code></pre>
+
+      <h3>10.2 Scenarii de testare functionala</h3>
+      <table>
+        <thead>
+          <tr><th>Scenariu</th><th>Rezultat asteptat</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Utilizatorul cauta campinguri dupa zona.</td><td>Lista se filtreaza si afiseaza doar rezultatele relevante.</td></tr>
+          <tr><td>Membrul face o rezervare valida.</td><td>Rezervarea este salvata cu status initial.</td></tr>
+          <tr><td>Membrul incearca rezervare suprapusa.</td><td>Serverul refuza cererea cu mesaj de eroare.</td></tr>
+          <tr><td>Membrul adauga recenzie cu media.</td><td>Recenzia si fisierul sunt salvate si afisate.</td></tr>
+          <tr><td>Adminul importa CSV/JSON.</td><td>Datele sunt normalizate, duplicatele sunt raportate, campingurile noi se salveaza.</td></tr>
+          <tr><td>Adminul exporta PDF/SVG.</td><td>Fisierul este generat si descarcat.</td></tr>
+          <tr><td>Rol custom cu <code>manage_reservations</code>.</td><td>Userul vede doar tab-ul rezervari si poate modifica statusuri.</td></tr>
+          <tr><td>User fara permisiune acceseaza <code>api/stats.php</code>.</td><td>Serverul returneaza eroare 403.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="concluzii">
+      <h2>11. Concluzii si dezvoltari viitoare</h2>
+      <p>
+        CaT acopera cerinta principala printr-o platforma Web functionala pentru campinguri, cu rezervari, recenzii, comunitate multimedia, harta interactiva, administrare, import/export si statistici. Aplicatia respecta constrangerile de implementare: fara framework-uri, cu servicii Web, Ajax, SQLite, HTML/CSS validabile si masuri de securitate de baza.
+      </p>
+      <h3>Dezvoltari viitoare</h3>
+      <ul>
+        <li>Sistem de notificari pentru rezervari confirmate sau anulate.</li>
+        <li>Moderare completa pentru mesaje si recenzii, folosind permisiunea <code>moderate_messages</code>.</li>
+        <li>Calendar vizual pentru disponibilitatea campingurilor.</li>
+        <li>Export suplimentar in XML sau iCalendar.</li>
+        <li>Optimizare pentru volume mai mari de date si paginare server-side.</li>
+        <li>Testare automata pentru endpoint-uri critice.</li>
+      </ul>
+    </section>
+
+    <section id="bibliografie">
+      <h2>12. Bibliografie si resurse</h2>
+      <ul>
+        <li>W3C HTML Living Standard si W3C Markup Validator.</li>
+        <li>CSS specifications si Stylelint pentru validarea foilor de stil.</li>
+        <li>PHP Documentation: PDO, password_hash, password_verify, file uploads.</li>
+        <li>SQLite Documentation.</li>
+        <li>GitHub OAuth Apps Documentation.</li>
+        <li>OpenStreetMap si Leaflet Documentation.</li>
+        <li>C4 Model pentru descrierea arhitecturii software.</li>
+        <li>IEEE Software Requirements Specification Template, folosit ca inspiratie pentru structurarea cerintelor.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      Document realizat pentru proiectul CaT - Camping Info Web Tool. Continutul este destinat evaluarii academice si descrie arhitectura, functionalitatile si deciziile de implementare ale aplicatiei.
+    </p>
+  </footer>
+</body>
+</html>
