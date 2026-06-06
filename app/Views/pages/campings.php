@@ -21,7 +21,7 @@ usort($serverCampings, function (array $a, array $b) use ($selectedSort): int {
     <div class="section-head">
       <div>
         <span class="eyebrow">Catalog</span>
-        <h2>Locuri de camping</h2>
+        <h1>Locuri de camping</h1>
       </div>
     </div>
 
@@ -50,6 +50,8 @@ usort($serverCampings, function (array $a, array $b) use ($selectedSort): int {
       </label>
       <button class="btn btn-primary" type="submit">Filtreaza</button>
     </form>
+
+    <h2 class="sr-only">Rezultate campinguri</h2>
 
     <div class="grid-3" id="campGrid">
       <?php if (!$serverCampings): ?>

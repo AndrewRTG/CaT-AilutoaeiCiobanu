@@ -20,45 +20,6 @@ class UserModel
         return 'member';
     }
 
-    public static function demoUserId(string $role): int
-    {
-        $isAdmin = $role === 'admin';
-        $providerId = $isAdmin ? 'admin' : 'member';
-        $name = $isAdmin ? 'Admin CaT' : 'Maria Pop';
-        $email = $isAdmin ? 'admin@cat.local' : 'maria@example.com';
-
-        $stmt = db()->prepare('INSERT OR IGNORE INTO users (provider, provider_id, name, email, role) VALUES (?, ?, ?, ?, ?)');
-        $stmt->execute(['demo-oauth', $providerId, $name, $email, $isAdmin ? 'admin' : 'member']);
-
-        $stmt = db()->prepare('SELECT id FROM users WHERE provider = ? AND provider_id = ?');
-        $stmt->execute(['demo-oauth', $providerId]);
-
-        return (int) $stmt->fetchColumn();
-    }
-
-        public static function createLocalUser(string $name, string $email, string $password): int
-    {
-        $email = strtolower(trim($email));
-
-        $stmt = db()->prepare('SELECT id FROM users WHERE provider = ? AND provider_id = ?');
-        $stmt->execute(['local', $email]);
-
-        if ($stmt->fetchColumn()) {
-            json_response(['error' => 'Exista deja un cont cu acest email.'], 409);
-        }
-
-        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-         $role = self::roleForEmail($email);
-
-        $stmt = db()->prepare(
-            'INSERT INTO users (provider, provider_id, name, email, password_hash, role, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?)'
-        );
-        
-        $stmt->execute(['local', $email, $name, $email, $passwordHash, $role, 'active']);
-
-        return (int) db()->lastInsertId();
-    }
 
 
     public static function authenticateLocalUser(string $email, string $password): int
@@ -122,10 +83,11 @@ class UserModel
 
     public static function updateRoleAndStatus(int $id, string $role, string $status): void
     {
-        $safeRole = $role === 'admin' ? 'admin' : 'member';
+        $safeRole = RoleModel::exists($role) ? $role : 'member';
         $safeStatus = $status === 'blocked' ? 'blocked' : 'active';
 
-        db()->prepare('UPDATE users SET role = ?, status = ? WHERE id = ?')->execute([$safeRole, $safeStatus, $id]);
+        db()->prepare('UPDATE users SET role = ?, status = ? WHERE id = ?')
+            ->execute([$safeRole, $safeStatus, $id]);
     }
 
     public static function exportRows(): array

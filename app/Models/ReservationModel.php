@@ -5,7 +5,7 @@ class ReservationModel
 {
     public static function forUser(array $user): array
     {
-        if ($user['role'] === 'admin') {
+        if (user_can($user, 'manage_reservations')) {
             return db()->query(
                 'SELECT r.*, u.name AS user_name, c.name AS camping_name
                  FROM reservations r

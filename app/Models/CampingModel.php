@@ -137,7 +137,7 @@ class CampingModel
 
     public static function exportRows(): array
     {
-        return db()->query('SELECT id, name, zone, price_per_night, rating, latitude, longitude, capacity, facilities FROM campings')->fetchAll();
+         return db()->query('SELECT id, name, zone, description, price_per_night, rating, latitude, longitude, image_url, capacity, facilities FROM campings')->fetchAll();
     }
 
     public static function payload(array $row): array

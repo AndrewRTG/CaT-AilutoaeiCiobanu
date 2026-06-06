@@ -6,12 +6,12 @@ class AdminUserController
     public static function handle(): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            require_admin();
+            require_permission('manage_users');
             json_response(['users' => UserModel::all()]);
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
-            require_admin();
+            require_permission('manage_users');
             $data = body_json();
             UserModel::updateRoleAndStatus((int) ($_GET['id'] ?? 0), $data['role'] ?? 'member', $data['status'] ?? 'active');
             json_response(['ok' => true]);

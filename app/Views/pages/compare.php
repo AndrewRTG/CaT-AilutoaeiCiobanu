@@ -3,7 +3,7 @@
     <div class="section-head">
       <div>
         <span class="eyebrow">Comparare</span>
-        <h2>Compara locatiile</h2>
+        <h1>Compara locatiile</h1>
       </div>
     </div>
     <div class="panel table-wrap">

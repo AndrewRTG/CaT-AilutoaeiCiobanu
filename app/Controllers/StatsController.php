@@ -5,7 +5,7 @@ class StatsController
 {
     public static function handle(): void
     {
-        require_admin();
+        require_permission('view_stats');
         json_response(['stats' => StatsModel::dashboard()]);
     }
 }

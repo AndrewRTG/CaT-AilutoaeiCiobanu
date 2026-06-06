@@ -12,11 +12,15 @@
   }
 
   let authToken = localStorage.getItem('cat_token') || '';
-let currentUser = bootstrap.user || null;
-let campings = [];
-let zones = [];
-let map = null;
-let mapMarkers = [];
+  let currentUser = bootstrap.user || null;
+  let campings = [];
+  let zones = [];
+  let map = null;
+  let mapMarkers = [];
+  let roles = [];
+  let availablePermissions = {};
+  const COMPARE_KEY = 'cat_compare';
+  let compareIds = loadCompareIds();
 
 function saveTokenFromUrl() {
   const params = new URLSearchParams(location.search);
@@ -41,6 +45,24 @@ function saveTokenFromUrl() {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
   }
+
+  function can(permission) {
+  return currentUser && (
+    currentUser.role === 'admin' ||
+    (currentUser.permissions || []).includes(permission)
+  );
+}
+
+function canOpenAdmin() {
+  return [
+    'view_stats',
+    'manage_campings',
+    'manage_reservations',
+    'manage_users',
+    'manage_roles',
+    'import_export',
+  ].some(permission => can(permission));
+}
 
   function showToast(message) {
     const toast = $('#toast');
@@ -99,6 +121,56 @@ function saveTokenFromUrl() {
     });
     return params;
   }
+
+  function loadCompareIds() {
+  try {
+    const data = JSON.parse(localStorage.getItem(COMPARE_KEY) || '[]');
+    return Array.isArray(data) ? data.map(Number).filter(Number.isFinite) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveCompareIds() {
+  localStorage.setItem(COMPARE_KEY, JSON.stringify(compareIds));
+}
+
+function isCompared(id) {
+  return compareIds.includes(Number(id));
+}
+
+function comparedCampings() {
+  return compareIds
+    .map(id => campings.find(camping => Number(camping.id) === Number(id)))
+    .filter(Boolean);
+}
+
+function toggleCompare(id) {
+  id = Number(id);
+
+  if (isCompared(id)) {
+    compareIds = compareIds.filter(item => Number(item) !== id);
+    saveCompareIds();
+    showToast('Camping scos din comparare.');
+    return;
+  }
+
+  if (compareIds.length >= 3) {
+    showToast('Poti compara maxim 3 campinguri.');
+    return;
+  }
+
+  compareIds.push(id);
+  saveCompareIds();
+  showToast('Camping adaugat la comparare.');
+}
+
+function refreshCompareUI() {
+  renderCampings();
+  renderCompare();
+  renderMapList();
+  updateMapPopups();
+}
 
   async function loadSession() { //nu e pe sesiuni ci pe token, dar tot trebuie sa incarc userul daca am token
     const session = await request('api/session.php');
@@ -186,6 +258,9 @@ function saveTokenFromUrl() {
           <div class="camp-footer">
             <div class="price"><strong>${Number(camping.price_per_night).toFixed(0)} RON</strong><span>pe noapte</span></div>
             <a class="btn btn-primary" href="index.php?page=detail&id=${camping.id}">Vezi</a>
+            <button class="btn btn-soft" type="button" data-compare-toggle="${camping.id}">
+              ${isCompared(camping.id) ? 'Scoate' : 'Compara'}
+            </button>
           </div>
         </div>
       </article>
@@ -274,31 +349,57 @@ function saveTokenFromUrl() {
   }
 
   function renderCompare() {
-    const table = $('#compareTable');
-    if (!table) {
-      return;
-    }
+  const table = $('#compareTable');
 
-    const selected = campings.slice(0, 3);
-    if (!selected.length) {
-      table.innerHTML = '<tbody><tr><td>Nu exista campinguri de comparat.</td></tr></tbody>';
-      return;
-    }
-
-    const rows = [
-      ['Zona', ...selected.map(camping => camping.zone)],
-      ['Pret/noapte', ...selected.map(camping => `${Number(camping.price_per_night).toFixed(0)} RON`)],
-      ['Rating', ...selected.map(camping => `★ ${Number(camping.rating).toFixed(1)}`)],
-      ['Capacitate', ...selected.map(camping => `${camping.capacity} persoane`)],
-      ['Facilitati', ...selected.map(camping => camping.facilities.slice(0, 4).join(', '))],
-    ];
-
-    table.innerHTML = `
-      <thead><tr><th>Criteriu</th>${selected.map(camping => `<th>${escapeHtml(camping.name)}</th>`).join('')}</tr></thead>
-      <tbody>${rows.map(row => `<tr>${row.map(cell => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')}</tbody>
-    `;
+  if (!table) {
+    return;
   }
 
+  const selected = comparedCampings();
+
+  if (!selected.length) {
+    table.innerHTML = `
+      <tbody>
+        <tr>
+          <td>
+            Nu ai selectat campinguri pentru comparare.
+            <a class="btn btn-soft" href="index.php?page=campings">Alege campinguri</a>
+          </td>
+        </tr>
+      </tbody>
+    `;
+    return;
+  }
+
+  const rows = [
+    ['Zona', ...selected.map(camping => camping.zone)],
+    ['Pret/noapte', ...selected.map(camping => `${Number(camping.price_per_night).toFixed(0)} RON`)],
+    ['Rating', ...selected.map(camping => `★ ${Number(camping.rating).toFixed(1)}`)],
+    ['Capacitate', ...selected.map(camping => `${camping.capacity} persoane`)],
+    ['Facilitati', ...selected.map(camping => camping.facilities.slice(0, 4).join(', '))],
+  ];
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Criteriu</th>
+        ${selected.map(camping => `<th>${escapeHtml(camping.name)}</th>`).join('')}
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map(row => `<tr>${row.map(cell => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')}
+      <tr>
+        <td>Actiuni</td>
+        ${selected.map(camping => `
+          <td>
+            <a class="btn btn-soft" href="index.php?page=detail&id=${camping.id}">Vezi</a>
+            <button class="btn btn-danger" type="button" data-compare-remove="${camping.id}">Scoate</button>
+          </td>
+        `).join('')}
+      </tr>
+    </tbody>
+  `;
+}
   function renderMapList() {
     const list = $('#mapList');
     if (!list) {
@@ -311,11 +412,27 @@ function saveTokenFromUrl() {
         <div>
           <h4>${escapeHtml(camping.name)}</h4>
           <p>${escapeHtml(camping.zone)} · ★ ${Number(camping.rating).toFixed(1)} · ${Number(camping.price_per_night).toFixed(0)} RON</p>
-          <a class="btn btn-soft" href="index.php?page=detail&id=${camping.id}">Detalii</a>
+         <a class="btn btn-soft" href="index.php?page=detail&id=${camping.id}">Detalii</a>
+          <button class="btn btn-soft" type="button" data-compare-toggle="${camping.id}">
+            ${isCompared(camping.id) ? 'Scoate' : 'Compara'}
+          </button>
         </div>
       </article>
     `).join('');
   }
+
+
+  function mapPopupHtml(camping) {
+  return `
+    <strong>${escapeHtml(camping.name)}</strong><br>
+    ${escapeHtml(camping.zone)}<br>
+    ★ ${Number(camping.rating).toFixed(1)} · ${Number(camping.price_per_night).toFixed(0)} RON/noapte<br>
+    <a class="btn btn-soft" href="index.php?page=detail&id=${camping.id}">Detalii</a>
+    <button class="btn btn-soft" type="button" data-compare-toggle="${camping.id}">
+      ${isCompared(camping.id) ? 'Scoate' : 'Compara'}
+    </button>
+  `;
+}
 
   function renderMap() {
     const mapEl = $('#osmMap');
@@ -336,11 +453,8 @@ function saveTokenFromUrl() {
 
     mapMarkers = campings.map(camping => {
       const marker = L.marker([camping.latitude, camping.longitude]).addTo(map);
-      marker.bindPopup(`
-        <strong>${escapeHtml(camping.name)}</strong><br>
-        ${escapeHtml(camping.zone)}<br>
-        ★ ${Number(camping.rating).toFixed(1)} · ${Number(camping.price_per_night).toFixed(0)} RON/noapte
-      `);
+     marker.bindPopup(mapPopupHtml(camping));
+     marker.campingId = Number(camping.id);
       marker.on('click', () => highlightMapCamping(camping.id));
       return marker;
     });
@@ -349,6 +463,20 @@ function saveTokenFromUrl() {
       map.fitBounds(L.featureGroup(mapMarkers).getBounds().pad(0.2));
     }
   }
+
+  function updateMapPopups() {
+  if (!mapMarkers.length) {
+    return;
+  }
+
+  mapMarkers.forEach(marker => {
+    const camping = campings.find(item => Number(item.id) === Number(marker.campingId));
+
+    if (camping) {
+      marker.setPopupContent(mapPopupHtml(camping));
+    }
+  });
+}
 
   function highlightMapCamping(id) {
     $$('.map-place').forEach(item => item.classList.toggle('active', Number(item.dataset.mapCamping) === Number(id)));
@@ -392,6 +520,32 @@ function saveTokenFromUrl() {
     window.location.href = 'index.php?page=auth';
     return false;
   }
+
+  function bindMapListActions() {
+  document.addEventListener('click', event => {
+    const card = event.target.closest('[data-map-camping]');
+
+    if (!card) {
+      return;
+    }
+
+    if (event.target.closest('a') || event.target.closest('button')) {
+      return;
+    }
+
+    const id = Number(card.dataset.mapCamping);
+    const camping = campings.find(item => Number(item.id) === id);
+    const marker = mapMarkers.find(item => Number(item.campingId) === id);
+
+    if (!camping || !marker || !map) {
+      return;
+    }
+
+    map.setView([camping.latitude, camping.longitude], 9);
+    marker.openPopup();
+    highlightMapCamping(id);
+  });
+}
 
   function renderAuthActions() {
   const box = $('#authActions');
@@ -533,6 +687,30 @@ function saveTokenFromUrl() {
     });
   }
 
+
+  function bindCompareActions() {
+  document.addEventListener('click', event => {
+    const toggleButton = event.target.closest('[data-compare-toggle]');
+
+    if (toggleButton) {
+      event.preventDefault();
+      toggleCompare(toggleButton.dataset.compareToggle);
+      refreshCompareUI();
+      return;
+    }
+
+    const removeButton = event.target.closest('[data-compare-remove]');
+
+    if (removeButton) {
+      event.preventDefault();
+      compareIds = compareIds.filter(id => Number(id) !== Number(removeButton.dataset.compareRemove));
+      saveCompareIds();
+      refreshCompareUI();
+      showToast('Camping scos din comparare.');
+    }
+  });
+}
+
   function bindHomePage() {
     const form = $('#quickSearchForm');
     if (!form) {
@@ -616,6 +794,34 @@ function saveTokenFromUrl() {
     });
   }
 
+  function syncAdminPermissions() {
+  $$('[data-permission]').forEach(element => {
+    element.hidden = !can(element.dataset.permission);
+  });
+
+  const visibleTabs = $$('.admin-tab').filter(tab => !tab.hidden);
+
+  if (!visibleTabs.length) {
+    return;
+  }
+
+  let activeTab = visibleTabs.find(tab => tab.classList.contains('active'));
+
+  if (!activeTab) {
+    activeTab = visibleTabs[0];
+  }
+
+  const key = activeTab.dataset.admin;
+
+  $$('.admin-tab').forEach(tab => {
+    tab.classList.toggle('active', tab === activeTab);
+  });
+
+  $$('.admin-section').forEach(section => {
+    section.classList.toggle('active', section.id === 'admin-' + key && !section.hidden);
+  });
+}
+
   async function loadAdmin() {
     const adminArea = $('#adminArea');
     const locked = $('#adminLocked');
@@ -623,7 +829,7 @@ function saveTokenFromUrl() {
       return;
     }
 
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || !canOpenAdmin()) {
       adminArea.style.display = 'none';
       locked.classList.add('show');
       return;
@@ -632,23 +838,47 @@ function saveTokenFromUrl() {
     adminArea.style.display = 'grid';
     locked.classList.remove('show');
 
-    const stats = await request('api/stats.php');
-    const reservations = await request('api/reservations.php');
-    const users = await request('api/admin_users.php');
+    syncAdminPermissions();
 
-    renderStats(stats.stats);
-    renderReservations(reservations.reservations || []);
-    renderUsers(users.users || []);
-    renderAdminCampings();
+    if (can('view_stats')) {
+      const stats = await request('api/stats.php');
+      renderStats(stats.stats);
+    }
+
+    if (can('manage_reservations')) {
+      const reservations = await request('api/reservations.php');
+      renderReservations(reservations.reservations || []);
+    }
+
+    if (can('manage_users') || can('manage_roles')) {
+      const rolePayload = await request('api/roles.php');
+      roles = rolePayload.roles || [];
+      availablePermissions = rolePayload.permissions || {};
+    }
+
+    if (can('manage_users')) {
+      const users = await request('api/admin_users.php');
+      renderUsers(users.users || []);
+    }
+
+    if (can('manage_roles')) {
+      renderRoles();
+      renderRolePermissions();
+    }
+
+    if (can('manage_campings')) {
+      renderAdminCampings();
+    }
   }
 
   function renderStats(stats) {
     const totals = stats.totals || {};
-    $('#adminStats').innerHTML = `
+      $('#adminStats').innerHTML = `
       <div class="stat-card"><span>Campinguri</span><strong>${totals.campings || 0}</strong></div>
       <div class="stat-card"><span>Utilizatori</span><strong>${totals.users || 0}</strong></div>
       <div class="stat-card"><span>Rezervari</span><strong>${totals.reservations || 0}</strong></div>
       <div class="stat-card"><span>Recenzii</span><strong>${totals.reviews || 0}</strong></div>
+      <div class="stat-card"><span>Mesaje</span><strong>${totals.messages || 0}</strong></div>
     `;
 
     const zonesStats = stats.zones || [];
@@ -671,6 +901,28 @@ function saveTokenFromUrl() {
       </svg>
     `;
 
+    const periodsStats = stats.periods || [];
+  const periodMax = Math.max(1, ...periodsStats.map(item => Number(item.total || 0)));
+
+  const periodBars = periodsStats.map((item, index) => {
+  const height = 140 * Number(item.total || 0) / periodMax;
+  const x = 76 + index * 96;
+  const y = 190 - height;
+
+    return `
+      <rect x="${x}" y="${y}" width="46" height="${height}" rx="6" fill="${index % 2 ? '#d9853b' : '#2f6b3f'}"></rect>
+      <text x="${x - 12}" y="220" font-size="12" fill="#65705f">${escapeHtml(item.period)}</text>
+    `;
+  }).join('');
+
+$('#periodChart').innerHTML = `
+  <svg width="100%" height="250" viewBox="0 0 620 250" role="img" aria-label="Perioade populare">
+    <rect width="620" height="250" rx="8" fill="#f7faf2"></rect>
+    <line x1="48" y1="190" x2="580" y2="190" stroke="#dbe4d1" stroke-width="2"></line>
+    ${periodBars || '<text x="70" y="130" font-size="16" fill="#65705f">Nu exista rezervari inca.</text>'}
+  </svg>
+`;
+
     $('#popularList').innerHTML = (stats.popular || []).map(item => `
       <div class="message">
         <div class="avatar">${escapeHtml(String(item.name).slice(0, 1))}</div>
@@ -680,6 +932,16 @@ function saveTokenFromUrl() {
         </div>
       </div>
     `).join('');
+    
+    $('#statusList').innerHTML = (stats.statuses || []).map(item => `
+  <div class="message">
+    <div class="avatar">${escapeHtml(String(item.status).slice(0, 1).toUpperCase())}</div>
+    <div>
+      <strong>${escapeHtml(item.status)}</strong>
+      <p>${Number(item.total || 0)} rezervari</p>
+    </div>
+  </div>
+`).join('') || '<p class="muted">Nu exista rezervari.</p>';
   }
 
   function renderAdminCampings() {
@@ -729,26 +991,103 @@ function saveTokenFromUrl() {
     `;
   }
 
-  function renderUsers(users) {
-    $('#usersTable').innerHTML = `
-      <thead><tr><th>Nume</th><th>Email</th><th>Provider</th><th>Rol</th><th>Status</th><th>Actiuni</th></tr></thead>
-      <tbody>
-        ${users.map(user => `
-          <tr>
-            <td>${escapeHtml(user.name)}</td>
-            <td>${escapeHtml(user.email)}</td>
-            <td>${escapeHtml(user.provider)}</td>
-            <td>${escapeHtml(user.role)}</td>
-            <td><span class="status">${escapeHtml(user.status)}</span></td>
-            <td>
-              <button class="btn btn-soft" type="button" data-user-role="${user.id}" data-role="${user.role === 'admin' ? 'member' : 'admin'}" data-status="${escapeHtml(user.status)}">${user.role === 'admin' ? 'Member' : 'Admin'}</button>
-              <button class="btn btn-danger" type="button" data-user-role="${user.id}" data-role="${escapeHtml(user.role)}" data-status="${user.status === 'active' ? 'blocked' : 'active'}">${user.status === 'active' ? 'Blocheaza' : 'Activeaza'}</button>
-            </td>
-          </tr>
-        `).join('')}
-      </tbody>
-    `;
+ function renderUsers(users) {
+  const table = $('#usersTable');
+
+  if (!table) {
+    return;
   }
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Nume</th>
+        <th>Email</th>
+        <th>Provider</th>
+        <th>Rol</th>
+        <th>Status</th>
+        <th>Actiuni</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${users.map(user => `
+        <tr>
+          <td>${escapeHtml(user.name)}</td>
+          <td>${escapeHtml(user.email)}</td>
+          <td>${escapeHtml(user.provider)}</td>
+          <td>
+            <select class="role-select" id="role-${user.id}">
+              ${roles.map(role => `
+                <option value="${escapeHtml(role.slug)}" ${role.slug === user.role ? 'selected' : ''}>
+                  ${escapeHtml(role.name)}
+                </option>
+              `).join('')}
+            </select>
+          </td>
+          <td><span class="status">${escapeHtml(user.status)}</span></td>
+          <td>
+            <button class="btn btn-soft" type="button" data-save-user-role="${user.id}" data-status="${escapeHtml(user.status)}">
+              Salveaza rol
+            </button>
+            <button class="btn btn-danger" type="button" data-user-role="${user.id}" data-role="${escapeHtml(user.role)}" data-status="${user.status === 'active' ? 'blocked' : 'active'}">
+              ${user.status === 'active' ? 'Blocheaza' : 'Activeaza'}
+            </button>
+          </td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
+function renderRolePermissions() {
+  const box = $('#rolePermissions');
+
+  if (!box) {
+    return;
+  }
+
+  box.innerHTML = Object.entries(availablePermissions).map(([key, label]) => `
+    <label class="permission-item">
+      <input type="checkbox" name="permissions" value="${escapeHtml(key)}">
+      <span>${escapeHtml(label)}</span>
+    </label>
+  `).join('');
+}
+
+function renderRoles() {
+  const table = $('#rolesTable');
+
+  if (!table) {
+    return;
+  }
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Rol</th>
+        <th>Slug</th>
+        <th>Permisiuni</th>
+        <th>Tip</th>
+        <th>Actiuni</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${roles.map(role => `
+        <tr>
+          <td>${escapeHtml(role.name)}</td>
+          <td>${escapeHtml(role.slug)}</td>
+          <td>${role.permissions.map(permission => `<span class="tag">${escapeHtml(permission)}</span>`).join(' ') || '<span class="muted">Fara permisiuni</span>'}</td>
+          <td>${role.is_system ? 'Sistem' : 'Custom'}</td>
+          <td>
+            ${role.is_system ? '<span class="muted">Protejat</span>' : `
+              <button class="btn btn-danger" type="button" data-delete-role="${escapeHtml(role.slug)}">Sterge</button>
+            `}
+          </td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
 
   function resetCampingForm() {
     const form = $('#campingForm');
@@ -760,6 +1099,47 @@ function saveTokenFromUrl() {
     $('#campingFormTitle').textContent = 'Adauga camping';
     $('#campingSubmit').textContent = 'Salveaza oferta';
   }
+  async function downloadExport(url) {
+  const headers = {};
+
+  if (authToken) {
+    headers.Authorization = 'Bearer ' + authToken;
+  }
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    let message = 'Exportul a esuat.';
+
+    try {
+      const payload = JSON.parse(text);
+      message = payload.error || message;
+    } catch (error) {
+    }
+
+    throw new Error(message);
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get('Content-Disposition') || '';
+  const match = disposition.match(/filename="?([^"]+)"?/);
+  const filename = match ? match[1] : 'cat-export';
+
+  const downloadUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = downloadUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(downloadUrl);
+}
 
   function bindAdmin() {
     const adminArea = $('#adminArea');
@@ -767,14 +1147,36 @@ function saveTokenFromUrl() {
       return;
     }
 
-    $$('.admin-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        const key = tab.dataset.admin;
-        $$('.admin-tab').forEach(item => item.classList.remove('active'));
-        tab.classList.add('active');
-        $$('.admin-section').forEach(section => section.classList.toggle('active', section.id === 'admin-' + key));
-      });
+   $$('.admin-tab').forEach(tab => {
+  tab.addEventListener('click', async () => {
+    if (tab.hidden) {
+      return;
+    }
+
+    const key = tab.dataset.admin;
+
+    $$('.admin-tab').forEach(item => item.classList.remove('active'));
+    tab.classList.add('active');
+
+    $$('.admin-section').forEach(section => {
+      section.classList.toggle('active', section.id === 'admin-' + key);
     });
+
+    if (key === 'roles' && can('manage_roles')) {
+      try {
+        const rolePayload = await request('api/roles.php');
+
+        roles = rolePayload.roles || [];
+        availablePermissions = rolePayload.permissions || {};
+
+        renderRoles();
+        renderRolePermissions();
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+  });
+});
 
     const reset = $('#resetCampingForm');
     if (reset) {
@@ -821,7 +1223,42 @@ function saveTokenFromUrl() {
           importForm.reset();
           await loadCampings();
           await loadAdmin();
-          showToast(`Import finalizat: ${payload.imported} campinguri.`);
+          console.log(payload.errors);
+          showToast(`Import finalizat: ${payload.imported} campinguri. Erori: ${(payload.errors || []).length}`);
+        } catch (error) {
+          showToast(error.message);
+        }
+      });
+    }
+
+    const roleForm = $('#roleForm');
+
+    if (roleForm) {
+      roleForm.addEventListener('submit', async event => {
+        event.preventDefault();
+
+        const form = new FormData(roleForm);
+        const permissions = Array.from(roleForm.querySelectorAll('input[name="permissions"]:checked'))
+          .map(input => input.value);
+
+        try {
+          await request('api/roles.php', {
+            method: 'POST',
+            json: {
+              name: form.get('name'),
+              permissions,
+            },
+          });
+
+          roleForm.reset();
+
+          const rolePayload = await request('api/roles.php');
+          roles = rolePayload.roles || [];
+          availablePermissions = rolePayload.permissions || {};
+
+          renderRoles();
+          renderRolePermissions();
+          showToast('Rolul a fost creat.');
         } catch (error) {
           showToast(error.message);
         }
@@ -829,6 +1266,24 @@ function saveTokenFromUrl() {
     }
 
     document.addEventListener('click', async event => {
+
+
+       const exportButton = event.target.closest('[data-export-url]');
+
+        if (exportButton) {
+          event.preventDefault();
+
+          try {
+            await downloadExport(exportButton.dataset.exportUrl);
+          } catch (error) {
+            showToast(error.message);
+          }
+
+          return;
+        }
+
+
+
       const edit = event.target.closest('[data-edit-camping]');
       if (edit) {
         const camping = campings.find(item => Number(item.id) === Number(edit.dataset.editCamping));
@@ -865,6 +1320,49 @@ function saveTokenFromUrl() {
         await loadAdmin();
       }
 
+      const saveRole = event.target.closest('[data-save-user-role]');
+
+      if (saveRole) {
+        const userId = saveRole.dataset.saveUserRole;
+        const select = $('#role-' + userId);
+
+        if (!select) {
+          return;
+        }
+
+        await request('api/admin_users.php?id=' + encodeURIComponent(userId), {
+          method: 'PATCH',
+          json: {
+            role: select.value,
+            status: saveRole.dataset.status,
+          },
+        });
+
+        await loadAdmin();
+        showToast('Rolul utilizatorului a fost actualizat.');
+        return;
+      }
+
+      const deleteRole = event.target.closest('[data-delete-role]');
+
+      if (deleteRole) {
+        await request('api/roles.php?slug=' + encodeURIComponent(deleteRole.dataset.deleteRole), {
+          method: 'DELETE',
+        });
+
+        const rolePayload = await request('api/roles.php');
+        roles = rolePayload.roles || [];
+        availablePermissions = rolePayload.permissions || {};
+
+        renderRoles();
+
+        const users = await request('api/admin_users.php');
+        renderUsers(users.users || []);
+
+        showToast('Rolul a fost sters.');
+        return;
+      }
+
       const user = event.target.closest('[data-user-role]');
       if (user) {
         await request('api/admin_users.php?id=' + encodeURIComponent(user.dataset.userRole), {
@@ -881,6 +1379,8 @@ function saveTokenFromUrl() {
 
   bindBasicUI();
   bindAuthForms();
+  bindCompareActions();
+  bindMapListActions();
   bindHomePage();
   bindCampingsPage();
   bindDetailForms();

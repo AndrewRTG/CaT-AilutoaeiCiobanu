@@ -9,6 +9,7 @@ declare(strict_types=1);
   <title>CaT - Camping Info Web Tool</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="alternate" type="application/rss+xml" title="CaT RSS" href="api/rss.php">
   <script type="application/json" id="bootstrap-data"><?= json_encode(['user' => $user, 'page' => $page, 'camping_id' => $campingId ?? null, 'oauth_error' => $oauthError], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
 </head>
 <body data-page="<?= e($page) ?>">
