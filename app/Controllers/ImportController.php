@@ -5,7 +5,7 @@ class ImportController
 {
     public static function handle(): void
     {
-        require_admin();
+        require_permission('import_export');
 
         if (empty($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
             json_response(['error' => 'Alege un fisier CSV sau JSON.'], 400);

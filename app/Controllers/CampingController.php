@@ -55,7 +55,7 @@ class CampingController
 
     private static function create(): void
     {
-        require_admin();
+        require_permission('manage_campings');
 
         $data = self::requestData();
         $imagePath = save_image_upload('image');
@@ -71,7 +71,7 @@ class CampingController
 
     private static function update(): void
     {
-        require_admin();
+       require_permission('manage_campings');
 
         $id = (int) ($_GET['id'] ?? 0);
         $current = CampingModel::rawFind($id);
@@ -96,7 +96,7 @@ class CampingController
 
     private static function delete(): void
     {
-        require_admin();
+        require_permission('manage_campings');
 
         $id = (int) ($_GET['id'] ?? 0);
 

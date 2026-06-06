@@ -15,15 +15,16 @@
 
     <div class="admin-layout" id="adminArea">
       <aside class="admin-menu">
-        <button class="admin-tab active" type="button" data-admin="dashboard">Dashboard</button>
-        <button class="admin-tab" type="button" data-admin="offers">Campinguri</button>
-        <button class="admin-tab" type="button" data-admin="reservations">Rezervari</button>
-        <button class="admin-tab" type="button" data-admin="users">Utilizatori</button>
-        <button class="admin-tab" type="button" data-admin="exports">Import / Export</button>
+        <button class="admin-tab active" type="button" data-admin="dashboard" data-permission="view_stats">Dashboard</button>
+        <button class="admin-tab" type="button" data-admin="offers" data-permission="manage_campings">Campinguri</button>
+        <button class="admin-tab" type="button" data-admin="reservations" data-permission="manage_reservations">Rezervari</button>
+        <button class="admin-tab" type="button" data-admin="users" data-permission="manage_users">Utilizatori</button>
+        <button class="admin-tab" type="button" data-admin="roles" data-permission="manage_roles">Roluri</button>
+        <button class="admin-tab" type="button" data-admin="exports" data-permission="import_export">Import / Export</button>
       </aside>
 
       <div class="admin-content">
-        <section class="admin-section active" id="admin-dashboard">
+        <section class="admin-section active" id="admin-dashboard" data-permission="view_stats">
           <div class="stat-grid" id="adminStats"></div>
 
           <div class="grid-2">
@@ -49,7 +50,7 @@
           </div>
         </section>
 
-        <section class="admin-section" id="admin-offers">
+      <section class="admin-section" id="admin-offers" data-permission="manage_campings">
           <form class="panel" id="campingForm" enctype="multipart/form-data">
             <h3 id="campingFormTitle">Adauga camping</h3>
             <input type="hidden" name="camping_id" id="campingEditId">
@@ -113,21 +114,46 @@
           </div>
         </section>
 
-        <section class="admin-section" id="admin-reservations">
+        <section class="admin-section" id="admin-reservations" data-permission="manage_reservations">
           <div class="panel table-wrap">
             <h3>Rezervari</h3>
             <table class="admin-table" id="reservationsTable"></table>
           </div>
         </section>
 
-        <section class="admin-section" id="admin-users">
+        <section class="admin-section" id="admin-users" data-permission="manage_users">
           <div class="panel table-wrap">
             <h3>Utilizatori</h3>
             <table class="admin-table" id="usersTable"></table>
           </div>
         </section>
 
-        <section class="admin-section" id="admin-exports">
+       <section class="admin-section" id="admin-roles" data-permission="manage_roles">
+          <form class="panel" id="roleForm">
+            <h3>Adauga rol custom</h3>
+
+            <div class="form-grid">
+              <label class="field wide">
+                <span>Nume rol</span>
+                <input name="name" placeholder="Ex: Manager rezervari" required>
+              </label>
+
+              <div class="field wide">
+                <span>Permisiuni</span>
+                <div class="permission-grid" id="rolePermissions"></div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" type="submit">Salveaza rol</button>
+          </form>
+
+          <div class="panel table-wrap">
+            <h3>Roluri existente</h3>
+            <table class="admin-table" id="rolesTable"></table>
+          </div>
+        </section>
+
+        <section class="admin-section" id="admin-exports" data-permission="import_export">
           <div class="grid-2">
             <form class="panel" id="importForm" enctype="multipart/form-data">
               <h3>Import campinguri</h3>

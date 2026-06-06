@@ -17,6 +17,8 @@
   let zones = [];
   let map = null;
   let mapMarkers = [];
+  let roles = [];
+  let availablePermissions = {};
   const COMPARE_KEY = 'cat_compare';
   let compareIds = loadCompareIds();
 
@@ -43,6 +45,24 @@ function saveTokenFromUrl() {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
   }
+
+  function can(permission) {
+  return currentUser && (
+    currentUser.role === 'admin' ||
+    (currentUser.permissions || []).includes(permission)
+  );
+}
+
+function canOpenAdmin() {
+  return [
+    'view_stats',
+    'manage_campings',
+    'manage_reservations',
+    'manage_users',
+    'manage_roles',
+    'import_export',
+  ].some(permission => can(permission));
+}
 
   function showToast(message) {
     const toast = $('#toast');
@@ -774,6 +794,34 @@ function refreshCompareUI() {
     });
   }
 
+  function syncAdminPermissions() {
+  $$('[data-permission]').forEach(element => {
+    element.hidden = !can(element.dataset.permission);
+  });
+
+  const visibleTabs = $$('.admin-tab').filter(tab => !tab.hidden);
+
+  if (!visibleTabs.length) {
+    return;
+  }
+
+  let activeTab = visibleTabs.find(tab => tab.classList.contains('active'));
+
+  if (!activeTab) {
+    activeTab = visibleTabs[0];
+  }
+
+  const key = activeTab.dataset.admin;
+
+  $$('.admin-tab').forEach(tab => {
+    tab.classList.toggle('active', tab === activeTab);
+  });
+
+  $$('.admin-section').forEach(section => {
+    section.classList.toggle('active', section.id === 'admin-' + key && !section.hidden);
+  });
+}
+
   async function loadAdmin() {
     const adminArea = $('#adminArea');
     const locked = $('#adminLocked');
@@ -781,7 +829,7 @@ function refreshCompareUI() {
       return;
     }
 
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || !canOpenAdmin()) {
       adminArea.style.display = 'none';
       locked.classList.add('show');
       return;
@@ -790,14 +838,37 @@ function refreshCompareUI() {
     adminArea.style.display = 'grid';
     locked.classList.remove('show');
 
-    const stats = await request('api/stats.php');
-    const reservations = await request('api/reservations.php');
-    const users = await request('api/admin_users.php');
+    syncAdminPermissions();
 
-    renderStats(stats.stats);
-    renderReservations(reservations.reservations || []);
-    renderUsers(users.users || []);
-    renderAdminCampings();
+    if (can('view_stats')) {
+      const stats = await request('api/stats.php');
+      renderStats(stats.stats);
+    }
+
+    if (can('manage_reservations')) {
+      const reservations = await request('api/reservations.php');
+      renderReservations(reservations.reservations || []);
+    }
+
+    if (can('manage_users') || can('manage_roles')) {
+      const rolePayload = await request('api/roles.php');
+      roles = rolePayload.roles || [];
+      availablePermissions = rolePayload.permissions || {};
+    }
+
+    if (can('manage_users')) {
+      const users = await request('api/admin_users.php');
+      renderUsers(users.users || []);
+    }
+
+    if (can('manage_roles')) {
+      renderRoles();
+      renderRolePermissions();
+    }
+
+    if (can('manage_campings')) {
+      renderAdminCampings();
+    }
   }
 
   function renderStats(stats) {
@@ -920,26 +991,103 @@ $('#periodChart').innerHTML = `
     `;
   }
 
-  function renderUsers(users) {
-    $('#usersTable').innerHTML = `
-      <thead><tr><th>Nume</th><th>Email</th><th>Provider</th><th>Rol</th><th>Status</th><th>Actiuni</th></tr></thead>
-      <tbody>
-        ${users.map(user => `
-          <tr>
-            <td>${escapeHtml(user.name)}</td>
-            <td>${escapeHtml(user.email)}</td>
-            <td>${escapeHtml(user.provider)}</td>
-            <td>${escapeHtml(user.role)}</td>
-            <td><span class="status">${escapeHtml(user.status)}</span></td>
-            <td>
-              <button class="btn btn-soft" type="button" data-user-role="${user.id}" data-role="${user.role === 'admin' ? 'member' : 'admin'}" data-status="${escapeHtml(user.status)}">${user.role === 'admin' ? 'Member' : 'Admin'}</button>
-              <button class="btn btn-danger" type="button" data-user-role="${user.id}" data-role="${escapeHtml(user.role)}" data-status="${user.status === 'active' ? 'blocked' : 'active'}">${user.status === 'active' ? 'Blocheaza' : 'Activeaza'}</button>
-            </td>
-          </tr>
-        `).join('')}
-      </tbody>
-    `;
+ function renderUsers(users) {
+  const table = $('#usersTable');
+
+  if (!table) {
+    return;
   }
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Nume</th>
+        <th>Email</th>
+        <th>Provider</th>
+        <th>Rol</th>
+        <th>Status</th>
+        <th>Actiuni</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${users.map(user => `
+        <tr>
+          <td>${escapeHtml(user.name)}</td>
+          <td>${escapeHtml(user.email)}</td>
+          <td>${escapeHtml(user.provider)}</td>
+          <td>
+            <select class="role-select" id="role-${user.id}">
+              ${roles.map(role => `
+                <option value="${escapeHtml(role.slug)}" ${role.slug === user.role ? 'selected' : ''}>
+                  ${escapeHtml(role.name)}
+                </option>
+              `).join('')}
+            </select>
+          </td>
+          <td><span class="status">${escapeHtml(user.status)}</span></td>
+          <td>
+            <button class="btn btn-soft" type="button" data-save-user-role="${user.id}" data-status="${escapeHtml(user.status)}">
+              Salveaza rol
+            </button>
+            <button class="btn btn-danger" type="button" data-user-role="${user.id}" data-role="${escapeHtml(user.role)}" data-status="${user.status === 'active' ? 'blocked' : 'active'}">
+              ${user.status === 'active' ? 'Blocheaza' : 'Activeaza'}
+            </button>
+          </td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
+function renderRolePermissions() {
+  const box = $('#rolePermissions');
+
+  if (!box) {
+    return;
+  }
+
+  box.innerHTML = Object.entries(availablePermissions).map(([key, label]) => `
+    <label class="permission-item">
+      <input type="checkbox" name="permissions" value="${escapeHtml(key)}">
+      <span>${escapeHtml(label)}</span>
+    </label>
+  `).join('');
+}
+
+function renderRoles() {
+  const table = $('#rolesTable');
+
+  if (!table) {
+    return;
+  }
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Rol</th>
+        <th>Slug</th>
+        <th>Permisiuni</th>
+        <th>Tip</th>
+        <th>Actiuni</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${roles.map(role => `
+        <tr>
+          <td>${escapeHtml(role.name)}</td>
+          <td>${escapeHtml(role.slug)}</td>
+          <td>${role.permissions.map(permission => `<span class="tag">${escapeHtml(permission)}</span>`).join(' ') || '<span class="muted">Fara permisiuni</span>'}</td>
+          <td>${role.is_system ? 'Sistem' : 'Custom'}</td>
+          <td>
+            ${role.is_system ? '<span class="muted">Protejat</span>' : `
+              <button class="btn btn-danger" type="button" data-delete-role="${escapeHtml(role.slug)}">Sterge</button>
+            `}
+          </td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
 
   function resetCampingForm() {
     const form = $('#campingForm');
@@ -999,14 +1147,36 @@ $('#periodChart').innerHTML = `
       return;
     }
 
-    $$('.admin-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        const key = tab.dataset.admin;
-        $$('.admin-tab').forEach(item => item.classList.remove('active'));
-        tab.classList.add('active');
-        $$('.admin-section').forEach(section => section.classList.toggle('active', section.id === 'admin-' + key));
-      });
+   $$('.admin-tab').forEach(tab => {
+  tab.addEventListener('click', async () => {
+    if (tab.hidden) {
+      return;
+    }
+
+    const key = tab.dataset.admin;
+
+    $$('.admin-tab').forEach(item => item.classList.remove('active'));
+    tab.classList.add('active');
+
+    $$('.admin-section').forEach(section => {
+      section.classList.toggle('active', section.id === 'admin-' + key);
     });
+
+    if (key === 'roles' && can('manage_roles')) {
+      try {
+        const rolePayload = await request('api/roles.php');
+
+        roles = rolePayload.roles || [];
+        availablePermissions = rolePayload.permissions || {};
+
+        renderRoles();
+        renderRolePermissions();
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+  });
+});
 
     const reset = $('#resetCampingForm');
     if (reset) {
@@ -1055,6 +1225,40 @@ $('#periodChart').innerHTML = `
           await loadAdmin();
           console.log(payload.errors);
           showToast(`Import finalizat: ${payload.imported} campinguri. Erori: ${(payload.errors || []).length}`);
+        } catch (error) {
+          showToast(error.message);
+        }
+      });
+    }
+
+    const roleForm = $('#roleForm');
+
+    if (roleForm) {
+      roleForm.addEventListener('submit', async event => {
+        event.preventDefault();
+
+        const form = new FormData(roleForm);
+        const permissions = Array.from(roleForm.querySelectorAll('input[name="permissions"]:checked'))
+          .map(input => input.value);
+
+        try {
+          await request('api/roles.php', {
+            method: 'POST',
+            json: {
+              name: form.get('name'),
+              permissions,
+            },
+          });
+
+          roleForm.reset();
+
+          const rolePayload = await request('api/roles.php');
+          roles = rolePayload.roles || [];
+          availablePermissions = rolePayload.permissions || {};
+
+          renderRoles();
+          renderRolePermissions();
+          showToast('Rolul a fost creat.');
         } catch (error) {
           showToast(error.message);
         }
@@ -1114,6 +1318,49 @@ $('#periodChart').innerHTML = `
           json: { status: reservation.dataset.status },
         });
         await loadAdmin();
+      }
+
+      const saveRole = event.target.closest('[data-save-user-role]');
+
+      if (saveRole) {
+        const userId = saveRole.dataset.saveUserRole;
+        const select = $('#role-' + userId);
+
+        if (!select) {
+          return;
+        }
+
+        await request('api/admin_users.php?id=' + encodeURIComponent(userId), {
+          method: 'PATCH',
+          json: {
+            role: select.value,
+            status: saveRole.dataset.status,
+          },
+        });
+
+        await loadAdmin();
+        showToast('Rolul utilizatorului a fost actualizat.');
+        return;
+      }
+
+      const deleteRole = event.target.closest('[data-delete-role]');
+
+      if (deleteRole) {
+        await request('api/roles.php?slug=' + encodeURIComponent(deleteRole.dataset.deleteRole), {
+          method: 'DELETE',
+        });
+
+        const rolePayload = await request('api/roles.php');
+        roles = rolePayload.roles || [];
+        availablePermissions = rolePayload.permissions || {};
+
+        renderRoles();
+
+        const users = await request('api/admin_users.php');
+        renderUsers(users.users || []);
+
+        showToast('Rolul a fost sters.');
+        return;
       }
 
       const user = event.target.closest('[data-user-role]');

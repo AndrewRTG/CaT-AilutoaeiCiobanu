@@ -83,10 +83,11 @@ class UserModel
 
     public static function updateRoleAndStatus(int $id, string $role, string $status): void
     {
-        $safeRole = $role === 'admin' ? 'admin' : 'member';
+        $safeRole = RoleModel::exists($role) ? $role : 'member';
         $safeStatus = $status === 'blocked' ? 'blocked' : 'active';
 
-        db()->prepare('UPDATE users SET role = ?, status = ? WHERE id = ?')->execute([$safeRole, $safeStatus, $id]);
+        db()->prepare('UPDATE users SET role = ?, status = ? WHERE id = ?')
+            ->execute([$safeRole, $safeStatus, $id]);
     }
 
     public static function exportRows(): array

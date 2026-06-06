@@ -5,7 +5,7 @@ class ExportController
 {
     public static function handle(): void
     {
-        require_admin();
+        require_permission('import_export');
 
         $format = $_GET['format'] ?? 'json';
         $entity = $_GET['entity'] ?? 'campings';

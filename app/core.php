@@ -76,7 +76,15 @@ function slug(string $text): string
 
 function current_user(): ?array
 {
-    return AuthTokenModel::userFromToken(bearer_token());
+    $user = AuthTokenModel::userFromToken(bearer_token());
+
+    if (!$user) {
+        return null;
+    }
+
+    $user['permissions'] = RoleModel::permissionsForRole($user['role'] ?? 'member');
+
+    return $user;
 }
 
 function require_login(): array
@@ -94,6 +102,32 @@ function require_admin(): array
     $user = require_login();
     if ($user['role'] !== 'admin') {
         json_response(['error' => 'Ai nevoie de rol admin.'], 403);
+    }
+
+    return $user;
+}
+
+function user_can(?array $user, string $permission): bool
+{
+    if (!$user) {
+        return false;
+    }
+
+    if (($user['role'] ?? '') === 'admin') {
+        return true;
+    }
+
+    $permissions = $user['permissions'] ?? RoleModel::permissionsForRole($user['role'] ?? 'member');
+
+    return in_array($permission, $permissions, true);
+}
+
+function require_permission(string $permission): array
+{
+    $user = require_login();
+
+    if (!user_can($user, $permission)) {
+        json_response(['error' => 'Nu ai permisiunea necesara.'], 403);
     }
 
     return $user;

@@ -36,6 +36,10 @@ if ($action === 'register') {
     $token = AuthTokenModel::createForUser($userId);
     $user = AuthTokenModel::userFromToken($token);
 
+    if ($user) {
+        $user['permissions'] = RoleModel::permissionsForRole($user['role'] ?? 'member');
+    }
+
     json_response([
         'token' => $token,
         'user' => $user,
@@ -53,7 +57,10 @@ if ($action === 'login') {
     $userId = UserModel::authenticateLocalUser($email, $password);
     $token = AuthTokenModel::createForUser($userId);
     $user = AuthTokenModel::userFromToken($token);
-
+    if ($user) {
+        $user['permissions'] = RoleModel::permissionsForRole($user['role'] ?? 'member');
+    }
+    
     json_response([
         'token' => $token,
         'user' => $user,

@@ -46,6 +46,16 @@ class DatabaseModel
         UNIQUE(provider, provider_id)
     )");
 
+    $db->exec("CREATE TABLE IF NOT EXISTS roles (
+    slug TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    permissions TEXT NOT NULL DEFAULT '[]',
+    is_system INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    RoleModel::seedDefaults();
+
 
 
         $db->exec("CREATE TABLE IF NOT EXISTS auth_tokens (
@@ -55,7 +65,7 @@ class DatabaseModel
     expires_at TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-)");
+    )");
 
         $db->exec("CREATE TABLE IF NOT EXISTS campings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

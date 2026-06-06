@@ -20,7 +20,7 @@ class ReservationController
         }
 
         if ($method === 'PATCH') {
-            require_admin();
+            require_permission('manage_reservations');
             $data = body_json();
             $status = clean($data['status'] ?? '', 20);
 
