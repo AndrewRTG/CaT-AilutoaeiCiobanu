@@ -680,12 +680,15 @@ h3 {
 
 .map-layout {
   grid-template-columns: 0.75fr 1.25fr;
+  align-items: start;
 }
 
 .map-sidebar {
   display: grid;
   gap: 10px;
   align-content: start;
+  max-height: 620px;
+  overflow-y: auto;
 }
 
 .map-place {
@@ -714,7 +717,8 @@ h3 {
 }
 
 .map-canvas {
-  min-height: 620px;
+  height: 620px;
+  min-height: 0;
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
@@ -969,6 +973,15 @@ h3 {
   .section-head {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .map-sidebar {
+    max-height: 420px;
+  }
+
+  .map-canvas {
+    height: 420px;
+    min-height: 0;
   }
 }
 
