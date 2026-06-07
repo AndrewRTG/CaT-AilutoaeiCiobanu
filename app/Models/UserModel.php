@@ -21,6 +21,31 @@ class UserModel
     }
 
 
+     public static function createLocalUser(string $name, string $email, string $password): int
+    {
+        $email = strtolower(trim($email));
+
+        $stmt = db()->prepare('SELECT id FROM users WHERE provider = ? AND provider_id = ?');
+        $stmt->execute(['local', $email]);
+
+        if ($stmt->fetchColumn()) {
+            json_response(['error' => 'Exista deja un cont cu acest email.'], 409);
+        }
+
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+         $role = self::roleForEmail($email);
+
+        $stmt = db()->prepare(
+            'INSERT INTO users (provider, provider_id, name, email, password_hash, role, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?)'
+        );
+        
+        $stmt->execute(['local', $email, $name, $email, $passwordHash, $role, 'active']);
+
+        return (int) db()->lastInsertId();
+    }
+
+
 
     public static function authenticateLocalUser(string $email, string $password): int
     {
