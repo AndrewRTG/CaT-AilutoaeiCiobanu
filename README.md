@@ -2,6 +2,8 @@
 
 CaT este o aplicatie Web pentru rezervarea, administrarea si compararea locurilor de camping. Proiectul a fost realizat pentru disciplina Tehnologii Web si respecta cerinta de a construi o aplicatie modulara, bazata pe servicii Web, fara framework-uri front-end sau back-end.
 
+# Link video https://wetransfer.com/downloads/e7d3bd4028313640b45d79faa943bc8820260609083906/7618f4?t_exp=1781253546&t_lsid=2a2d1147-409b-4f68-866e-32e68646cd93&t_network=link&t_rid=ZW1haWx8YWRyb2l0fGVjZGZkN2Y1LWNlMzctNDFiZi1iOWNiLTA0YWZhODJkMjgyMA==&t_s=download_link&t_ts=1780994374
+
 Aplicatia permite utilizatorilor sa caute campinguri, sa vada detalii, sa faca rezervari, sa lase recenzii si sa publice mesaje in comunitate, inclusiv cu fisiere multimedia. Administratorii pot gestiona campingurile, utilizatorii, rezervarile, rolurile, importul/exportul de date si statisticile platformei.
 
 ## Functionalitati principale
